@@ -23,16 +23,16 @@ class GraphicsProgram3D:
         self.model_matrix = Matrices.ModelMatrix()
 
         self.projection_matrix = Matrices.ProjectionMatrix()
-        self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 10)
+        self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 30)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.view_matrix = Matrices.ViewMatrix()
 
         # set camera so I can see the cube good
-        self.view_matrix.eye = Base3DObjects.Point(0, 0, 0)
+        self.view_matrix.eye = Base3DObjects.Point(5, 1, 0)             #make 5 a variable dependent on the floor dim
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
-        self.shader.set_light_position(self.view_matrix.eye)
+        self.shader.set_light_position(Base3DObjects.Point(5, 5, 0))
 
         self.cube = Base3DObjects.Cube()
         self.sphere = Base3DObjects.Sphere(20, 20)
@@ -58,6 +58,7 @@ class GraphicsProgram3D:
 
         self.texture_id_01 = self.load_texture(sys.path[0] + "/textures/tex_01.png")
         self.texture_raindrops = self.load_texture(sys.path[0] + "/textures/tex_raindrops.png")
+        self.texture_wood = self.load_texture(sys.path[0] + "/textures/tex_wooden_floor.jpeg")
 
     def load_texture(self, path_str): # should be in its own class?
         surface = pygame.image.load(path_str)
@@ -124,19 +125,23 @@ class GraphicsProgram3D:
         self.shader.set_mat_specular(1.0, 1.0, 1.0)
         self.shader.set_mat_emission(0.0, 0.0, 0.0)
 
-        # cube 1
-        glActiveTexture(GL_TEXTURE0)                            # set active texture (0)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id_01)        # bind texture to active texture
-        self.shader.set_texture_diffuse(0)                      # set diffuse shader to 0
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, self.texture_raindrops)
-        self.shader.set_texture_specular(1)
+        # Floor
+        self.set_diffuse_tex(self.texture_wood)
+        # self.set_specular_tex(self.texture_raindrops)
+        self.draw_floor()
+
+        glViewport(0, 0, 800, 600)
+        self.model_matrix.load_identity()
+
+        pygame.display.flip()
+
+    def draw_floor(self):
+        floor_dim = 10
+        floor_thickness = 0.4
 
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(0, 0, -5)
-        self.model_matrix.add_scale(2, 2, 2)
-        # self.model_matrix.add_rotation(self.angle_deg * rotate_speed, "x")
-        # self.model_matrix.add_rotation(self.angle_deg * rotate_speed, "z")
+        self.model_matrix.add_translation(floor_dim / 2, - floor_thickness / 2, - floor_dim / 2)
+        self.model_matrix.add_scale(floor_dim, floor_thickness, floor_dim)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
@@ -146,22 +151,27 @@ class GraphicsProgram3D:
         self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-        # sphere
-        # self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(3, 0, -5)
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
+    def draw_sphere(self):
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(3, 0, -5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        # self.shader.set_mat_diffuse(0, 0, 1)
-        # self.shader.set_mat_shine(50)
-        # self.shader.set_mat_ambient(0, 0, 0.2)
+        self.shader.set_mat_diffuse(0, 0, 1)
+        self.shader.set_mat_shine(50)
+        self.shader.set_mat_ambient(0, 0, 0.2)
 
-        # self.sphere.draw(self.shader)
-        # self.model_matrix.pop_matrix()
+        self.sphere.draw(self.shader)
+        self.model_matrix.pop_matrix()
 
-        glViewport(0, 0, 800, 600)
-        self.model_matrix.load_identity()
+    def set_diffuse_tex(self, tex_id):
+        glActiveTexture(GL_TEXTURE0)                            # set active texture (0)
+        glBindTexture(GL_TEXTURE_2D, tex_id)                    # bind texture to active texture
+        self.shader.set_texture_diffuse(0)                      # set diffuse shader to 0
 
-        pygame.display.flip()
+    def set_specular_tex(self, tex_id):
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.texture_raindrops)
+        self.shader.set_texture_specular(1)
 
     def program_loop(self):
         exiting = False
