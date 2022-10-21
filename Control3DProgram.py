@@ -10,6 +10,7 @@ from pygame.locals import *
 import Matrices
 import Shaders
 import Base3DObjects
+import AnimatedObjects
 
 class GraphicsProgram3D:
     def __init__(self):
@@ -29,17 +30,24 @@ class GraphicsProgram3D:
         self.view_matrix = Matrices.ViewMatrix()
 
         # set camera so I can see the cube good
-        self.view_matrix.eye = Base3DObjects.Point(5, 1, 0)             #make 5 a variable dependent on the floor dim
+        self.view_matrix.eye = Base3DObjects.Point(5, 1, 4)             #make 5 a variable dependent on the floor dim
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         self.shader.set_light_position(Base3DObjects.Point(5, 5, 0))
 
+        # General objects, maybe dont need later
         self.cube = Base3DObjects.Cube()
         self.sphere = Base3DObjects.Sphere(20, 20)
 
+        # Animated objects
+        self.a_sphere = AnimatedObjects.ASphere(2)
+
+        # Time
         self.clock = pygame.time.Clock()
         self.clock.tick()
+        self.time_elapsed = 0
 
+        # Angles
         self.angle = 0
         self.angle_turn = 0.05
         self.delta_time = None
@@ -74,6 +82,7 @@ class GraphicsProgram3D:
         return tex_id
 
     def update(self):
+        self.time_elapsed = pygame.time.get_ticks() / 1000
         self.delta_time = self.clock.tick() / 1000
         self.angle += math.pi * self.delta_time
         self.angle_deg = self.angle * 57.2957795
@@ -112,8 +121,6 @@ class GraphicsProgram3D:
         glClearColor(0.1, 0.1, 0.1, 1.0)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-        rotate_speed = 0.2
-
         # Lights
         self.shader.set_light_diffuse(1, 1, 1)
         self.shader.set_light_ambient(0.2, 0.2, 0.2)
@@ -127,8 +134,10 @@ class GraphicsProgram3D:
 
         # Floor
         self.set_diffuse_tex(self.texture_wood)
-        # self.set_specular_tex(self.texture_raindrops)
         self.draw_floor()
+        self.draw_sphere()
+
+        self.a_sphere.increase_height()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -137,7 +146,7 @@ class GraphicsProgram3D:
 
     def draw_floor(self):
         floor_dim = 10
-        floor_thickness = 0.4
+        floor_thickness = 0.2
 
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(floor_dim / 2, - floor_thickness / 2, - floor_dim / 2)
@@ -153,14 +162,15 @@ class GraphicsProgram3D:
 
     def draw_sphere(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(3, 0, -5)
+        self.model_matrix.add_translation(5, self.a_sphere.height, -5)
+        self.model_matrix.add_scale(self.a_sphere.width, self.a_sphere.height, self.a_sphere.width)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.shader.set_mat_diffuse(0, 0, 1)
-        self.shader.set_mat_shine(50)
+        self.shader.set_mat_shine(30)
         self.shader.set_mat_ambient(0, 0, 0.2)
 
-        self.sphere.draw(self.shader)
+        self.a_sphere.object.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def set_diffuse_tex(self, tex_id):
