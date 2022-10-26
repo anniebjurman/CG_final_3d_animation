@@ -3,6 +3,7 @@ from OpenGL.GLU import *
 
 import math
 import numpy
+import Base3DObjects
 
 class Point:
     def __init__(self, x, y, z):
@@ -254,6 +255,10 @@ class MeshModel:
     def draw(self, shader):
         for mesh_id, mesh_material in self.mesh_materials.items():
             material = self.materials[mesh_material]
+            # material.diffuse = Base3DObjects.Color(0.3, 0.2, 0.6)
+            print("MAT DIFFUSE: ", material.diffuse.r, material.diffuse.g, material.diffuse.b)
+            print("MAT SPEC: ", material.specular.r, material.specular.g, material.specular.b)
+            print("MAT SHINE: ", material.shininess)
             shader.set_mat_diffuse(material.diffuse)
             shader.set_mat_specular(material.specular)
             shader.set_mat_shine(material.shininess)

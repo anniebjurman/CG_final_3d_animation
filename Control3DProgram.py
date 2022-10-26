@@ -44,9 +44,9 @@ class GraphicsProgram3D:
         self.sphere = Base3DObjects.Sphere(20, 20)
 
         # Other objects
-        object_file_location = sys.path[0] + "/models"
-        self.obj_model = obj3DLoading.load_obj_file(object_file_location, "metallic_sphere.obj")
-        self.obj_model_2 = obj3DLoading.load_obj_file(object_file_location, "combined_model.obj")
+        self.obj_model = obj3DLoading.load_obj_file(sys.path[0] + "/models", "metallic_sphere.obj")
+        self.obj_model_2 = obj3DLoading.load_obj_file(sys.path[0] + "/models", "combined_model.obj")
+        self.obj_model_house = obj3DLoading.load_obj_file(sys.path[0] + "/models/house1/models_textures", "house.obj")
 
         # Time
         self.clock = pygame.time.Clock()
@@ -152,30 +152,16 @@ class GraphicsProgram3D:
         self.shader.set_global_ambient(1, 1, 1)
         self.shader.set_eye_location(self.view_matrix.eye)
 
-        # self.shader.set_mat_ambient(Base3DObjects.Color(0.2, 0.2, 0.2))
-        # self.shader.set_mat_specular(Base3DObjects.Color(1.0, 1.0, 1.0))
-        # self.shader.set_mat_emission(0.0, 0.0, 0.0)
-
         # Floor
         self.shader.set_using_texture(1.0)
         self.set_diffuse_tex(self.texture_wood)
         self.draw_floor()
 
-        # bez cube
-        # self.shader.set_using_texture(1.0)
-        # self.set_diffuse_tex(self.texture_id_01)
-        # self.draw_bez_moving_cube()
-
         # sphere
         self.shader.set_using_texture(0.0)
-        # self.draw_sphere()
-        self.draw_model_sphere()
-
-        self.draw_model_2()
-
-        # lin cube
-        # self.set_diffuse_tex(self.texture_id_01)
-        # self.draw_lin_moving_cube()
+        # self.draw_model_sphere()
+        # self.draw_model_2()
+        self.draw_model_house()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -228,7 +214,7 @@ class GraphicsProgram3D:
 
     #     self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
     #     self.shader.set_mat_shine(30)
-    #     self.shader.set_mat_ambient(0, 0, 0.2)
+    #     self.shader.set_mat_ambient(Base3DObjects.Color(0, 0, 0.2))
 
     #     self.opt_sphere.set_vertices(self.shader)
     #     self.opt_sphere.draw()
@@ -252,10 +238,6 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(2, 1, -5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        # self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
-        # self.shader.set_mat_shine(30)
-        # self.shader.set_mat_ambient(0, 0, 0.2)
-
         self.obj_model.draw(self.shader)
         self.model_matrix.pop_matrix()
 
@@ -264,11 +246,16 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(5, 1, -2)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        # self.shader.set_mat_diffuse(Base3DObjects.Color(0.5, 0.5, 0.5))
-        # self.shader.set_mat_shine(30)
-        # self.shader.set_mat_ambient(0.2, 0.2, 0.2)
-
         self.obj_model_2.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+    def draw_model_house(self):
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(5, 0, -3)
+        self.model_matrix.add_scale(0.2, 0.2, 0.2)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.obj_model_house.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def set_diffuse_tex(self, tex_id):
