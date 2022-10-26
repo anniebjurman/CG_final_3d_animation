@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 import math
 import sys
 import time
@@ -11,6 +12,7 @@ import Matrices
 import Shaders
 import Base3DObjects
 import AnimatedObjects
+import Motion
 
 class GraphicsProgram3D:
     def __init__(self):
@@ -46,6 +48,10 @@ class GraphicsProgram3D:
         self.clock = pygame.time.Clock()
         self.clock.tick()
         self.time_elapsed = 0
+
+        #motion
+        self.lin_motion = Motion.LinearMotion(Base3DObjects.Point(0, 1, -3), Base3DObjects.Point(5, 0, -10), 5.0, 10.0)
+        self.model_pos = Base3DObjects.Point(0,0,0)
 
         # Angles
         self.angle = 0
@@ -86,6 +92,8 @@ class GraphicsProgram3D:
         self.delta_time = self.clock.tick() / 1000
         self.angle += math.pi * self.delta_time
         self.angle_deg = self.angle * 57.2957795
+
+        self.model_pos = self.lin_motion.get_current_pos(self.time_elapsed)
 
         # look up/down/left/right
         if self.UP_key_right:
@@ -135,14 +143,25 @@ class GraphicsProgram3D:
         # Floor
         self.set_diffuse_tex(self.texture_wood)
         self.draw_floor()
-        self.draw_sphere()
 
-        self.a_sphere.increase_height()
+        #cube
+        self.set_diffuse_tex(self.texture_id_01)
+        self.draw_moving_cube()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
 
         pygame.display.flip()
+
+    def draw_moving_cube(self):
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.model_pos.x, self.model_pos.y, self.model_pos.z)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
+        self.shader.set_mat_shine(13)
+        self.shader.set_mat_ambient(0.1, 0.1, 0.1)
+        self.cube.draw(self.shader)
+        self.model_matrix.pop_matrix()
 
     def draw_floor(self):
         floor_dim = 10
