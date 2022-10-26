@@ -13,6 +13,8 @@ uniform vec4 u_mat_emission; //self-illumination of material
 uniform sampler2D u_tex01;
 uniform sampler2D u_tex02;
 
+uniform float u_using_texture;
+
 varying vec4 v_normal;
 varying vec4 v_s;
 varying vec4 v_h;
@@ -20,8 +22,13 @@ varying vec2 v_uv;
 
 void main(void)
 {
-    vec4 mat_diffuse = u_mat_diffuse * texture2D(u_tex01, v_uv);
-    vec4 mat_ambient = u_mat_ambient * texture2D(u_tex01, v_uv);
+    vec4 mat_diffuse = u_mat_diffuse;
+    vec4 mat_ambient = u_mat_ambient;
+
+    if (u_using_texture == 1.0) {
+        mat_diffuse *= texture2D(u_tex01, v_uv);
+        mat_ambient *= texture2D(u_tex01, v_uv);
+    }
 
     vec4 mat_specular = u_mat_specular * texture2D(u_tex02, v_uv);
 

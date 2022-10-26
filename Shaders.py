@@ -1,5 +1,6 @@
 
 from OpenGL.GL import *
+from OpenGL.GLU import *
 import sys
 from Base3DObjects import *
 
@@ -59,6 +60,7 @@ class Shader3D:
 
         self.texDiffLoc = glGetUniformLocation(self.renderingProgramID, "u_tex01")
         self.texSpecLoc = glGetUniformLocation(self.renderingProgramID, "u_tex02")
+        self.usingTexLoc = glGetUniformLocation(self.renderingProgramID, "u_using_texture")
 
 
     def use(self):
@@ -87,6 +89,11 @@ class Shader3D:
 
     def set_uv_attribute(self, vertex_array):
         glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 0, vertex_array)
+
+    def set_attribute_buffer(self, vertex_buffer_id):
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
+        glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 0, None)
 
     # Lights
     def set_light_position(self, pos):
@@ -124,9 +131,13 @@ class Shader3D:
     def set_eye_location(self, pos):
         glUniform4f(self.eyePosLoc, pos.x, pos.y, pos.z, 1.0)
 
+    # texture
     def set_texture_diffuse(self, num):
         glUniform1i(self.texDiffLoc, num)
 
     def set_texture_specular(self, num):
         glUniform1i(self.texSpecLoc, num)
+
+    def set_using_texture(self, num: float):
+        glUniform1f(self.usingTexLoc, num)
 

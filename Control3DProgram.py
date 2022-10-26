@@ -11,7 +11,6 @@ from pygame.locals import *
 import Matrices
 import Shaders
 import Base3DObjects
-import AnimatedObjects
 import Motion
 
 class GraphicsProgram3D:
@@ -39,11 +38,8 @@ class GraphicsProgram3D:
 
         # General objects, maybe dont need later
         self.cube = Base3DObjects.Cube()
-        self.cube.set_vertices(self.shader)
+        self.opt_sphere = Base3DObjects.OptimizedSphere(20, 20)
         self.sphere = Base3DObjects.Sphere(20, 20)
-
-        # Animated objects
-        self.a_sphere = AnimatedObjects.ASphere(2)
 
         # Time
         self.clock = pygame.time.Clock()
@@ -154,15 +150,21 @@ class GraphicsProgram3D:
         self.shader.set_mat_emission(0.0, 0.0, 0.0)
 
         # Floor
+        self.shader.set_using_texture(1.0)
         self.set_diffuse_tex(self.texture_wood)
         self.draw_floor()
 
-        # lin cube
-        self.set_diffuse_tex(self.texture_id_01)
-        self.draw_lin_moving_cube()
-
         # bez cube
+        self.set_diffuse_tex(self.texture_id_01)
         self.draw_bez_moving_cube()
+
+        # sphere
+        self.shader.set_using_texture(0.0)
+        self.draw_sphere()
+
+        # # lin cube
+        # self.set_diffuse_tex(self.texture_id_01)
+        # self.draw_lin_moving_cube()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -176,6 +178,7 @@ class GraphicsProgram3D:
         self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
+        self.cube.set_vertices(self.shader)
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
@@ -186,6 +189,7 @@ class GraphicsProgram3D:
         self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
+        self.cube.set_vertices(self.shader)
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
@@ -202,21 +206,33 @@ class GraphicsProgram3D:
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
 
+        self.cube.set_vertices(self.shader)
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_sphere(self):
+    def draw_optimized_sphere(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(5, self.a_sphere.height, -5)
-        self.model_matrix.add_scale(self.a_sphere.width, self.a_sphere.height, self.a_sphere.width)
+        self.model_matrix.add_translation(2, 10, -5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.shader.set_mat_diffuse(0, 0, 1)
         self.shader.set_mat_shine(30)
         self.shader.set_mat_ambient(0, 0, 0.2)
 
-        self.a_sphere.object.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+
+    def draw_sphere(self):
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(2, 1, -5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.shader.set_mat_diffuse(0, 0, 1)
+        self.shader.set_mat_shine(30)
+        self.shader.set_mat_ambient(0, 0, 0.2)
+
+        self.sphere.set_vertices(self.shader)
+        self.sphere.draw()
 
     def set_diffuse_tex(self, tex_id):
         glActiveTexture(GL_TEXTURE0)                            # set active texture (0)
