@@ -39,6 +39,7 @@ class GraphicsProgram3D:
 
         # General objects, maybe dont need later
         self.cube = Base3DObjects.Cube()
+        self.cube.set_vertices(self.shader)
         self.sphere = Base3DObjects.Sphere(20, 20)
 
         # Animated objects
@@ -175,7 +176,7 @@ class GraphicsProgram3D:
         self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
-        self.cube.draw(self.shader)
+        self.cube.draw()
         self.model_matrix.pop_matrix()
 
     def draw_bez_moving_cube(self):
@@ -185,7 +186,7 @@ class GraphicsProgram3D:
         self.shader.set_mat_diffuse(1.0, 1.0, 1.0)
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
-        self.cube.draw(self.shader)
+        self.cube.draw()
         self.model_matrix.pop_matrix()
 
     def draw_floor(self):
@@ -201,7 +202,7 @@ class GraphicsProgram3D:
         self.shader.set_mat_shine(13)
         self.shader.set_mat_ambient(0.1, 0.1, 0.1)
 
-        self.cube.draw(self.shader)
+        self.cube.draw()
         self.model_matrix.pop_matrix()
 
     def draw_sphere(self):

@@ -128,12 +128,12 @@ class Cube:
                          1.0, 1.0,
                          1.0, 0.0]
 
-    def draw(self, shader):
-
+    def set_vertices(self, shader):
         shader.set_position_attribute(self.position_array)
         shader.set_normal_attribute(self.normal_array)
         shader.set_uv_attribute(self.uv_array)
 
+    def draw(self):
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 4, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 8, 4)
@@ -164,10 +164,11 @@ class Sphere:
 
                 self.vertex_count += 2
 
-    def draw(self, shader):
+    def set_vertices(self, shader):
         shader.set_position_attribute(self.vertex_array)
         shader.set_normal_attribute(self.vertex_array)
 
+    def draw(self):
         for i in range(0, self.vertex_count, (self.slices + 1) * 2):
             glDrawArrays(GL_TRIANGLE_STRIP, i, (self.slices + 1) * 2)
 
