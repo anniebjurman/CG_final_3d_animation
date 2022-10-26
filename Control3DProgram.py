@@ -66,7 +66,7 @@ class GraphicsProgram3D:
 
         # Angles
         self.angle = 0
-        self.angle_turn = 0.2
+        self.angle_turn = 0.1
         self.delta_time = None
         self.angle_deg = None
 
@@ -152,9 +152,9 @@ class GraphicsProgram3D:
         self.shader.set_global_ambient(1, 1, 1)
         self.shader.set_eye_location(self.view_matrix.eye)
 
-        self.shader.set_mat_ambient(0.2, 0.2, 0.2)
-        self.shader.set_mat_specular(Base3DObjects.Color(1.0, 1.0, 1.0))
-        self.shader.set_mat_emission(0.0, 0.0, 0.0)
+        # self.shader.set_mat_ambient(Base3DObjects.Color(0.2, 0.2, 0.2))
+        # self.shader.set_mat_specular(Base3DObjects.Color(1.0, 1.0, 1.0))
+        # self.shader.set_mat_emission(0.0, 0.0, 0.0)
 
         # Floor
         self.shader.set_using_texture(1.0)
@@ -162,20 +162,20 @@ class GraphicsProgram3D:
         self.draw_floor()
 
         # bez cube
-        self.shader.set_using_texture(1.0)
-        self.set_diffuse_tex(self.texture_id_01)
-        self.draw_bez_moving_cube()
+        # self.shader.set_using_texture(1.0)
+        # self.set_diffuse_tex(self.texture_id_01)
+        # self.draw_bez_moving_cube()
 
         # sphere
         self.shader.set_using_texture(0.0)
-        self.draw_sphere()
+        # self.draw_sphere()
         self.draw_model_sphere()
 
         self.draw_model_2()
 
         # lin cube
-        self.set_diffuse_tex(self.texture_id_01)
-        self.draw_lin_moving_cube()
+        # self.set_diffuse_tex(self.texture_id_01)
+        # self.draw_lin_moving_cube()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -215,7 +215,7 @@ class GraphicsProgram3D:
 
         self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
         self.shader.set_mat_shine(13)
-        self.shader.set_mat_ambient(0.1, 0.1, 0.1)
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.1, 0.1))
 
         self.cube.set_vertices(self.shader)
         self.cube.draw()
@@ -252,9 +252,9 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(2, 1, -5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
-        self.shader.set_mat_shine(30)
-        self.shader.set_mat_ambient(0, 0, 0.2)
+        # self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
+        # self.shader.set_mat_shine(30)
+        # self.shader.set_mat_ambient(0, 0, 0.2)
 
         self.obj_model.draw(self.shader)
         self.model_matrix.pop_matrix()
@@ -264,9 +264,9 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(5, 1, -2)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.shader.set_mat_diffuse(Base3DObjects.Color(0.5, 0.5, 0.5))
-        self.shader.set_mat_shine(30)
-        self.shader.set_mat_ambient(0.2, 0.2, 0.2)
+        # self.shader.set_mat_diffuse(Base3DObjects.Color(0.5, 0.5, 0.5))
+        # self.shader.set_mat_shine(30)
+        # self.shader.set_mat_ambient(0.2, 0.2, 0.2)
 
         self.obj_model_2.draw(self.shader)
         self.model_matrix.pop_matrix()

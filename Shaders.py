@@ -123,8 +123,8 @@ class Shader3D:
     def set_mat_shine(self, s: float):
         glUniform1f(self.matShineLoc, s)
 
-    def set_mat_ambient(self, r, g, b):
-        glUniform4f(self.matAmbLoc, r, g, b, 1.0)
+    def set_mat_ambient(self, color: Color):
+        glUniform4f(self.matAmbLoc, color.r, color.g, color.b , 1.0)
 
     def set_mat_emission(self, r, g, b):
         glUniform4f(self.matEmiLoc, r, g, b, 1.0)

@@ -257,6 +257,8 @@ class MeshModel:
             shader.set_mat_diffuse(material.diffuse)
             shader.set_mat_specular(material.specular)
             shader.set_mat_shine(material.shininess)
+            mat_ambient = Color(material.diffuse.r * 0.2, material.diffuse.g * 0.2, material.diffuse.b * 0.2)
+            shader.set_mat_ambient(mat_ambient)
             shader.set_attribute_buffer(self.vertex_buffer_ids[mesh_id])
             glDrawArrays(GL_TRIANGLES, 0, self.vertex_counts[mesh_id])
             glBindBuffer(GL_ARRAY_BUFFER, 0)
