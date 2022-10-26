@@ -26,7 +26,7 @@ class LinearMotion:
             out_pos = Base3DObjects.Point(x, y, z)
         return out_pos
 
-class BeiserMotion:
+class BezierMotion:
     def __init__(self,
                  p1: Base3DObjects.Point,
                  p2: Base3DObjects.Point,
