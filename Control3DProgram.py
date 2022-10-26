@@ -103,6 +103,10 @@ class GraphicsProgram3D:
         self.model_pos_lin = self.lin_motion.get_current_pos(self.time_elapsed)
         self.model_pos_bez= self.bez_motion.get_current_pos(self.time_elapsed)
 
+        # specific_time = 7.5
+        # self.model_pos_lin = self.lin_motion.get_current_pos(specific_time)
+        # self.model_pos_bez= self.bez_motion.get_current_pos(specific_time)
+
         # look up/down/left/right
         if self.UP_key_right:
             self.view_matrix.turn(-self.angle_turn)
@@ -157,7 +161,6 @@ class GraphicsProgram3D:
         self.draw_lin_moving_cube()
 
         # bez cube
-        # self.set_diffuse_tex(self.texture_raindrops)
         self.draw_bez_moving_cube()
 
         glViewport(0, 0, 800, 600)
