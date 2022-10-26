@@ -92,8 +92,13 @@ class Shader3D:
 
     def set_attribute_buffer(self, vertex_buffer_id):
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
-        glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 0, None)
-        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 6 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
+        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 6 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
+
+    # def set_attribute_buffer(self, vertex_buffer_id):
+    #     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
+    #     glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 0, None)
+    #     glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 0, None)
 
     # Lights
     def set_light_position(self, pos):
@@ -109,13 +114,13 @@ class Shader3D:
         glUniform4f(self.lightSpecLoc, r, g, b, 1.0)
 
 
-    def set_mat_diffuse(self, r, g, b):
-        glUniform4f(self.matDifLoc, r, g, b, 1.0)
+    def set_mat_diffuse(self, color: Color):
+        glUniform4f(self.matDifLoc, color.r, color.g, color.b, 1.0)
 
-    def set_mat_specular(self, r, g, b):
-        glUniform4f(self.matSpecLoc, r, g, b, 1.0)
+    def set_mat_specular(self, color: Color):
+        glUniform4f(self.matSpecLoc, color.r, color.g, color.b, 1.0)
 
-    def set_mat_shine(self, s):
+    def set_mat_shine(self, s: float):
         glUniform1f(self.matShineLoc, s)
 
     def set_mat_ambient(self, r, g, b):
