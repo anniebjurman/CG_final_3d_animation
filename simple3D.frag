@@ -24,13 +24,13 @@ void main(void)
 {
     vec4 mat_diffuse = u_mat_diffuse;
     vec4 mat_ambient = u_mat_ambient;
+    vec4 mat_specular = u_mat_specular;
 
     if (u_using_texture == 1.0) {
         mat_diffuse *= texture2D(u_tex01, v_uv);
         mat_ambient *= texture2D(u_tex01, v_uv);
+        mat_specular *= texture2D(u_tex02, v_uv);
     }
-
-    vec4 mat_specular = u_mat_specular * texture2D(u_tex02, v_uv);
 
     float lambert = max(dot(v_normal, v_s), 0.0);
     float phong = max(dot(v_normal, v_h), 0.0);
