@@ -4,6 +4,8 @@ from OpenGL.GLU import *
 import math
 import numpy
 import Base3DObjects
+import Texture
+import sys
 
 class Point:
     def __init__(self, x, y, z):
@@ -52,6 +54,20 @@ class Vector:
 
     def to_string(self):
         return "[" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + "]"
+
+class Color:
+    def __init__(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
+
+class Material:
+    def __init__(self, diffuse = None, specular = None, shininess = None, ambient = None, tex_map = None):
+        self.diffuse = Color(0.0, 0.0, 0.0) if diffuse == None else diffuse
+        self.specular = Color(0.0, 0.0, 0.0) if specular == None else specular
+        self.shininess = 1 if shininess == None else shininess
+        self.ambient = Color(0.0, 0.0, 0.0) if specular == None else ambient
+        self.tex_map = tex_map
 
 class Cube:
     def __init__(self):
@@ -209,19 +225,6 @@ class OptimizedSphere:
             glDrawArrays(GL_TRIANGLE_STRIP, i, (self.slices + 1) * 2)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-# from mesh model addon
-class Color:
-    def __init__(self, r, g, b):
-        self.r = r
-        self.g = g
-        self.b = b
-
-class Material:
-    def __init__(self, diffuse = None, specular = None, shininess = None):
-        self.diffuse = Color(0.0, 0.0, 0.0) if diffuse == None else diffuse
-        self.specular = Color(0.0, 0.0, 0.0) if specular == None else specular
-        self.shininess = 1 if shininess == None else shininess
-
 class MeshModel:
     def __init__(self):
         self.vertex_arrays = dict()
@@ -255,15 +258,19 @@ class MeshModel:
     def draw(self, shader):
         for mesh_id, mesh_material in self.mesh_materials.items():
             material = self.materials[mesh_material]
-            # material.diffuse = Base3DObjects.Color(0.3, 0.2, 0.6)
-            print("MAT DIFFUSE: ", material.diffuse.r, material.diffuse.g, material.diffuse.b)
-            print("MAT SPEC: ", material.specular.r, material.specular.g, material.specular.b)
-            print("MAT SHINE: ", material.shininess)
+            # print("MAT DIFFUSE: ", material.diffuse.r, material.diffuse.g, material.diffuse.b)
+            # print("MAT SPEC: ", material.specular.r, material.specular.g, material.specular.b)
+            # print("MAT AMB: ", material.ambient.r, material.ambient.g, material.ambient.b)
+            # print("MAT SHINE: ", material.shininess)
+            # print("TEX MAP: ", material.tex_map)
+            # if (material.tex_map):
+            #     tex_id = Texture.load_texture(sys.path[0] + "/textures/" + tex_folder_name + "/" + material.tex_map)
+            #     Texture.set_diffuse_tex(shader, tex_id)
             shader.set_mat_diffuse(material.diffuse)
             shader.set_mat_specular(material.specular)
             shader.set_mat_shine(material.shininess)
-            mat_ambient = Color(material.diffuse.r * 0.2, material.diffuse.g * 0.2, material.diffuse.b * 0.2)
-            shader.set_mat_ambient(mat_ambient)
+            amb = Base3DObjects.Color(material.diffuse.r * 0.2, material.diffuse.g * 0.2, material.diffuse.b * 0.2)
+            shader.set_mat_ambient(amb)
             shader.set_attribute_buffer(self.vertex_buffer_ids[mesh_id])
             glDrawArrays(GL_TRIANGLES, 0, self.vertex_counts[mesh_id])
             glBindBuffer(GL_ARRAY_BUFFER, 0)

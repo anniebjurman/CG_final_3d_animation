@@ -1,3 +1,4 @@
+from lib2to3.pgen2 import token
 from Base3DObjects import *
 
 def load_mtl_file(file_location, file_name, mesh_model):
@@ -18,6 +19,10 @@ def load_mtl_file(file_location, file_name, mesh_model):
             mtl.specular = Color(float(tokens[1]), float(tokens[2]), float(tokens[3]))
         elif tokens[0] == "Ns":
             mtl.shininess = float(tokens[1])
+        elif tokens[0] == "Ka":
+            mtl.ambient = Color(float(tokens[1]), float(tokens[2]), float(tokens[3]))
+        elif tokens[0] == "map_Kd":
+            mtl.tex_map = str(tokens[1])
     print("  Finished loading MTL: " + file_name)
 
 def load_obj_file(file_location, file_name):

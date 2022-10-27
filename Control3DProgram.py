@@ -1,7 +1,5 @@
-from lib2to3.pytree import Base
 import math
 import sys
-import time
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -12,6 +10,7 @@ import Matrices
 import Shaders
 import Base3DObjects
 import Motion
+import Texture
 
 import obj3DLoading
 
@@ -44,9 +43,8 @@ class GraphicsProgram3D:
         self.sphere = Base3DObjects.Sphere(20, 20)
 
         # Other objects
-        self.obj_model = obj3DLoading.load_obj_file(sys.path[0] + "/models", "metallic_sphere.obj")
+        self.obj_metallic_sphere = obj3DLoading.load_obj_file(sys.path[0] + "/models", "metallic_sphere.obj")
         self.obj_model_2 = obj3DLoading.load_obj_file(sys.path[0] + "/models", "combined_model.obj")
-        self.obj_model_house = obj3DLoading.load_obj_file(sys.path[0] + "/models/house1/models_textures", "house.obj")
 
         # Time
         self.clock = pygame.time.Clock()
@@ -81,22 +79,10 @@ class GraphicsProgram3D:
         self.UP_key_a = False
         self.UP_key_d = False
 
-        self.texture_id_01 = self.load_texture(sys.path[0] + "/textures/tex_01.png")
-        self.texture_raindrops = self.load_texture(sys.path[0] + "/textures/tex_raindrops.png")
-        self.texture_wood = self.load_texture(sys.path[0] + "/textures/tex_wooden_floor.jpeg")
-
-    def load_texture(self, path_str): # should be in its own class?
-        surface = pygame.image.load(path_str)
-        tex_string = pygame.image.tostring(surface, "RGBA", 1)
-        width = surface.get_width()
-        height = surface.get_height()
-        tex_id = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, tex_id)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
-
-        return tex_id
+        # textures
+        self.texture_id_01 = Texture.load_texture(sys.path[0] + "/textures/tex_01.png")
+        self.texture_raindrops = Texture.load_texture(sys.path[0] + "/textures/tex_raindrops.png")
+        self.texture_wood = Texture.load_texture(sys.path[0] + "/textures/tex_wooden_floor.jpeg")
 
     def update(self):
         self.time_elapsed = pygame.time.get_ticks() / 1000
@@ -154,14 +140,13 @@ class GraphicsProgram3D:
 
         # Floor
         self.shader.set_using_texture(1.0)
-        self.set_diffuse_tex(self.texture_wood)
+        Texture.set_diffuse_tex(self.shader, self.texture_wood)
         self.draw_floor()
 
         # sphere
         self.shader.set_using_texture(0.0)
-        # self.draw_model_sphere()
-        # self.draw_model_2()
-        self.draw_model_house()
+        self.draw_metallic_sphere()
+        self.draw_model_2()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -207,19 +192,6 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
-    # def draw_optimized_sphere(self):
-    #     self.model_matrix.push_matrix()
-    #     self.model_matrix.add_translation(2, 5, -5)
-    #     self.shader.set_model_matrix(self.model_matrix.matrix)
-
-    #     self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
-    #     self.shader.set_mat_shine(30)
-    #     self.shader.set_mat_ambient(Base3DObjects.Color(0, 0, 0.2))
-
-    #     self.opt_sphere.set_vertices(self.shader)
-    #     self.opt_sphere.draw()
-    #     self.model_matrix.pop_matrix()
-
     def draw_sphere(self):
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(2, 5, -5)
@@ -233,12 +205,12 @@ class GraphicsProgram3D:
         self.sphere.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_model_sphere(self):
+    def draw_metallic_sphere(self):
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(2, 1, -5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.obj_model.draw(self.shader)
+        self.obj_metallic_sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_model_2(self):
@@ -249,24 +221,6 @@ class GraphicsProgram3D:
         self.obj_model_2.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-    def draw_model_house(self):
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(5, 0, -3)
-        self.model_matrix.add_scale(0.2, 0.2, 0.2)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-
-        self.obj_model_house.draw(self.shader)
-        self.model_matrix.pop_matrix()
-
-    def set_diffuse_tex(self, tex_id):
-        glActiveTexture(GL_TEXTURE0)                            # set active texture (0)
-        glBindTexture(GL_TEXTURE_2D, tex_id)                    # bind texture to active texture
-        self.shader.set_texture_diffuse(0)                      # set diffuse shader to 0
-
-    def set_specular_tex(self, tex_id):
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, self.texture_raindrops)
-        self.shader.set_texture_specular(1)
 
     def program_loop(self):
         exiting = False
