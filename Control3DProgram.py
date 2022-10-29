@@ -62,7 +62,8 @@ class GraphicsProgram3D:
 
         # Other objects
         self.obj_model_person = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person.obj")
-        self.obj_model_ghost = obj3DLoading.load_obj_file(sys.path[0] + "/models", "ghost2.obj")
+        self.obj_model_person_sitting = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person_sitting.obj")
+        self.obj_model_spikeball = obj3DLoading.load_obj_file(sys.path[0] + "/models", "spikeball_2.obj")
 
         # Angles
         self.angle = 0
@@ -155,6 +156,8 @@ class GraphicsProgram3D:
         self.draw_moon()
         self.draw_bez_moving_cube()
         self.draw_model_person()
+        self.draw_model_spike_ball()
+        self.draw_model_person_sitting()
 
         self.model_matrix.pop_matrix()
         ######### Translated to middle of sphere #########
@@ -221,6 +224,26 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.obj_model_person.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+    def draw_model_person_sitting(self):
+        self.shader.set_using_texture(0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(-2, 0, 4.4)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.obj_model_person_sitting.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+    def draw_model_spike_ball(self):
+        self.shader.set_using_texture(0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 20)
+        # self.model_matrix.add_scale(0.1, 0.1, 0.1)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.obj_model_spikeball.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_mars(self):
