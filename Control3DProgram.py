@@ -64,6 +64,8 @@ class GraphicsProgram3D:
         self.obj_model_person = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person.obj")
         self.obj_model_person_sitting = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person_sitting.obj")
         self.obj_model_spikeball = obj3DLoading.load_obj_file(sys.path[0] + "/models", "spikeball_2.obj")
+        self.obj_model_negative_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "negative_text.obj")
+        self.obj_model_positive_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "positive_text.obj")
 
         # Angles
         self.angle = 0
@@ -158,6 +160,8 @@ class GraphicsProgram3D:
         self.draw_model_person()
         self.draw_model_spike_ball()
         self.draw_model_person_sitting()
+        self.draw_model_negative_text()
+        self.draw_model_positive_text()
 
         self.model_matrix.pop_matrix()
         ######### Translated to middle of sphere #########
@@ -234,6 +238,26 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.obj_model_person_sitting.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+    def draw_model_negative_text(self):
+        self.shader.set_using_texture(0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(-2, 2.5, 4.7)
+        self.model_matrix.add_scale(0.3, 0.3, 0.3)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.obj_model_negative_text.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+    def draw_model_positive_text(self):
+        self.shader.set_using_texture(0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(3, 5, 0)
+        self.model_matrix.add_scale(0.3, 0.3, 0.3)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.obj_model_positive_text.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_model_spike_ball(self):
