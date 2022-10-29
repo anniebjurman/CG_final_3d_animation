@@ -1,6 +1,5 @@
-
 import math
-from Base3DObjects import *
+import Base3DObjects
 
 class ModelMatrix:
     def __init__(self):
@@ -97,14 +96,14 @@ class ModelMatrix:
 
 class ViewMatrix:
     def __init__(self):
-        self.eye = Point(0, 0, 0)
-        self.u = Vector(1, 0, 0)
-        self.v = Vector(0, 1, 0)
-        self.n = Vector(0, 0, 1)
+        self.eye = Base3DObjects.Point(0, 0, 0)
+        self.u = Base3DObjects.Vector(1, 0, 0)
+        self.v = Base3DObjects.Vector(0, 1, 0)
+        self.n = Base3DObjects.Vector(0, 0, 1)
 
-    def look(self, eye: Vector, center: Vector, up: Vector):
+    def look(self, eye: Base3DObjects.Vector, center: Base3DObjects.Vector, up: Base3DObjects.Vector):
         self.eye = eye
-        self.n = Vector(eye[0] - center[0], eye[1] - center[1], eye[2] - center[2])
+        self.n = Base3DObjects.Vector(eye[0] - center[0], eye[1] - center[1], eye[2] - center[2])
         self.u = up.cross(self.n)
         self.v = self.n.cross(self.u)
 
@@ -124,11 +123,11 @@ class ViewMatrix:
         ang_sin = math.sin(angle * math.pi/180.0)
         u_org = self.u # store original u
 
-        self.u = Vector(ang_cos * u_org.x + ang_sin * self.v.x,
+        self.u = Base3DObjects.Vector(ang_cos * u_org.x + ang_sin * self.v.x,
                         ang_cos * u_org.y + ang_sin * self.v.y,
                         ang_cos * u_org.z + ang_sin * self.v.z)
 
-        self.v = Vector(- ang_sin * u_org.x + ang_cos * self.v.x,
+        self.v = Base3DObjects.Vector(- ang_sin * u_org.x + ang_cos * self.v.x,
                         - ang_sin * u_org.y + ang_cos * self.v.y,
                         - ang_sin * u_org.z + ang_cos * self.v.z)
 
@@ -138,11 +137,11 @@ class ViewMatrix:
         ang_sin = math.sin(angle * math.pi/180.0)
         n_org = self.n # store original n
 
-        self.n = Vector(ang_cos * n_org.x + ang_sin * self.v.x,
+        self.n = Base3DObjects.Vector(ang_cos * n_org.x + ang_sin * self.v.x,
                         ang_cos * n_org.y + ang_sin * self.v.y,
                         ang_cos * n_org.z + ang_sin * self.v.z)
 
-        self.v = Vector(- ang_sin * n_org.x + ang_cos * self.v.x,
+        self.v = Base3DObjects.Vector(- ang_sin * n_org.x + ang_cos * self.v.x,
                         - ang_sin * n_org.y + ang_cos * self.v.y,
                         - ang_sin * n_org.z + ang_cos * self.v.z)
 
@@ -152,11 +151,11 @@ class ViewMatrix:
         ang_sin = math.sin(angle * math.pi/180.0)
         n_org = self.n # store original n
 
-        self.n = Vector(ang_cos * n_org.x + ang_sin * self.u.x,
+        self.n = Base3DObjects.Vector(ang_cos * n_org.x + ang_sin * self.u.x,
                         ang_cos * n_org.y + ang_sin * self.u.y,
                         ang_cos * n_org.z + ang_sin * self.u.z)
 
-        self.u = Vector(- ang_sin * n_org.x + ang_cos * self.u.x,
+        self.u = Base3DObjects.Vector(- ang_sin * n_org.x + ang_cos * self.u.x,
                         - ang_sin * n_org.y + ang_cos * self.u.y,
                         - ang_sin * n_org.z + ang_cos * self.u.z)
 
@@ -167,12 +166,12 @@ class ViewMatrix:
         self.n = self.rotate_around_y(self.n, angle * math.pi / 180)
 
     def rotate_around_y(self, v, angle):
-        return Vector(v.x * math.cos(angle) + v.z * math.sin(angle),
+        return Base3DObjects.Vector(v.x * math.cos(angle) + v.z * math.sin(angle),
                       v.y,
                       v.x * -math.sin(angle) + v.z * math.cos(angle))
 
     def get_matrix(self):
-        minusEye = Vector(-self.eye.x, -self.eye.y, -self.eye.z)
+        minusEye = Base3DObjects.Vector(-self.eye.x, -self.eye.y, -self.eye.z)
         return [self.u.x, self.u.y, self.u.z, minusEye.dot(self.u),
                 self.v.x, self.v.y, self.v.z, minusEye.dot(self.v),
                 self.n.x, self.n.y, self.n.z, minusEye.dot(self.n),

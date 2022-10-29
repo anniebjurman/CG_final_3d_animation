@@ -3,9 +3,6 @@ from OpenGL.GLU import *
 
 import math
 import numpy
-import Base3DObjects
-import Texture
-import sys
 
 class Point:
     def __init__(self, x, y, z):
@@ -201,13 +198,22 @@ class OptimizedSphere:
             stack_angle = stack_count * stack_interval
             for slice_count in range(slices + 1):
                 slice_angle = slice_count * slice_interval
-                vertex_array.append(math.sin(stack_angle) * math.cos(slice_angle))
-                vertex_array.append(math.cos(stack_angle))
-                vertex_array.append(math.sin(stack_angle) * math.sin(slice_angle))
 
-                vertex_array.append(math.sin(stack_angle + stack_interval) * math.cos(slice_angle))
-                vertex_array.append(math.cos(stack_angle + stack_interval))
-                vertex_array.append(math.sin(stack_angle + stack_interval) * math.sin(slice_angle))
+                for _ in range(2):
+                    vertex_array.append(math.sin(stack_angle) * math.cos(slice_angle))
+                    vertex_array.append(math.cos(stack_angle))
+                    vertex_array.append(math.sin(stack_angle) * math.sin(slice_angle))
+
+                vertex_array.append(slice_count / slices)
+                vertex_array.append(stack_count / stacks)
+
+                for _ in range(2):
+                    vertex_array.append(math.sin(stack_angle + stack_interval) * math.cos(slice_angle))
+                    vertex_array.append(math.cos(stack_angle + stack_interval))
+                    vertex_array.append(math.sin(stack_angle + stack_interval) * math.sin(slice_angle))
+
+                vertex_array.append(slice_count / slices)
+                vertex_array.append((stack_count + 1) / stacks)
 
                 self.vertex_count += 2
 
@@ -218,7 +224,7 @@ class OptimizedSphere:
         vertex_array = None
 
     def set_vertices(self, shader):
-        shader.set_attribute_buffer(self.vertex_buffer_id)
+        shader.set_attribute_buffer_with_uv(self.vertex_buffer_id)
 
     def draw(self):
         for i in range(0, self.vertex_count, (self.slices + 1) * 2):
@@ -269,8 +275,18 @@ class MeshModel:
             shader.set_mat_diffuse(material.diffuse)
             shader.set_mat_specular(material.specular)
             shader.set_mat_shine(material.shininess)
-            amb = Base3DObjects.Color(material.diffuse.r * 0.2, material.diffuse.g * 0.2, material.diffuse.b * 0.2)
+            amb = Color(material.diffuse.r * 0.2, material.diffuse.g * 0.2, material.diffuse.b * 0.2)
             shader.set_mat_ambient(amb)
             shader.set_attribute_buffer(self.vertex_buffer_ids[mesh_id])
             glDrawArrays(GL_TRIANGLES, 0, self.vertex_counts[mesh_id])
             glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+class BeizerObject:
+    def __init__(self, beizer_motion):
+        self.beizer_motion = beizer_motion
+        self.position_array = self.beizer_motion.get_vertex_list()
+
+    def set_vertices(self, shader):
+        shader.set_position_attribute(self.position_array)
+        # shader.set_normal_attribute(self.normal_array)
+        # shader.set_uv_attribute(self.uv_array)

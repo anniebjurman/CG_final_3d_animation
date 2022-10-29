@@ -11,7 +11,6 @@ import Shaders
 import Base3DObjects
 import Motion
 import Texture
-
 import obj3DLoading
 
 class GraphicsProgram3D:
@@ -22,29 +21,29 @@ class GraphicsProgram3D:
 
         self.shader = Shaders.Shader3D()
         self.shader.use()
+        self.shader.set_using_texture(0.0)
 
         self.model_matrix = Matrices.ModelMatrix()
 
+        self.sphere_width = 40
+
         self.projection_matrix = Matrices.ProjectionMatrix()
-        self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 30)
+        self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 150)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.view_matrix = Matrices.ViewMatrix()
 
-        # set camera so I can see the cube good
-        self.view_matrix.eye = Base3DObjects.Point(5, 1, 4)             #make 5 a variable dependent on the floor dim
+        # set camera
+        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2, self.sphere_width/2 + 3, -self.sphere_width/2 + 15)             #make 5 a variable dependent on the floor dim
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
-        self.shader.set_light_position(Base3DObjects.Point(5, 5, 0))
+        # set light
+        self.shader.set_light_position(Base3DObjects.Point(20, 40, 0))
 
-        # General objects, maybe dont need later
+        # General objects
         self.cube = Base3DObjects.Cube()
         self.opt_sphere = Base3DObjects.OptimizedSphere(24, 48)
         self.sphere = Base3DObjects.Sphere(20, 20)
-
-        # Other objects
-        self.obj_metallic_sphere = obj3DLoading.load_obj_file(sys.path[0] + "/models", "metallic_sphere.obj")
-        self.obj_model_2 = obj3DLoading.load_obj_file(sys.path[0] + "/models", "combined_model.obj")
 
         # Time
         self.clock = pygame.time.Clock()
@@ -61,6 +60,11 @@ class GraphicsProgram3D:
                                                  Base3DObjects.Point(0, 7, - 20),
                                                  5.0, 10.0)
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
+
+        # Other objects
+        self.beizer_obj = Base3DObjects.BeizerObject(self.bez_motion)
+        self.obj_model_person = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person.obj")
+        self.obj_model_ghost = obj3DLoading.load_obj_file(sys.path[0] + "/models", "ghost2.obj")
 
         # Angles
         self.angle = 0
@@ -81,8 +85,8 @@ class GraphicsProgram3D:
 
         # textures
         self.texture_id_01 = Texture.load_texture(sys.path[0] + "/textures/tex_01.png")
-        self.texture_raindrops = Texture.load_texture(sys.path[0] + "/textures/tex_raindrops.png")
         self.texture_wood = Texture.load_texture(sys.path[0] + "/textures/tex_wooden_floor.jpeg")
+        self.texture_sphere = Texture.load_texture(sys.path[0] + "/textures/tex_sphere_5.jpeg")
 
     def update(self):
         self.time_elapsed = pygame.time.get_ticks() / 1000
@@ -141,17 +145,34 @@ class GraphicsProgram3D:
         # Floor
         self.shader.set_using_texture(1.0)
         Texture.set_diffuse_tex(self.shader, self.texture_wood)
+        Texture.set_specular_tex(self.shader, self.texture_wood)
         self.draw_floor()
 
-        # sphere
+        # # objects
+        Texture.set_diffuse_tex(self.shader, self.texture_sphere)
+        self.draw_sky_sphere()
         self.shader.set_using_texture(0.0)
-        self.draw_metallic_sphere()
-        self.draw_model_2()
+        self.draw_model_person()
+        self.draw_model_ghost()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
 
         pygame.display.flip()
+
+    def draw_sky_box(self):
+        width = 40
+        height = 20
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(width/2, height/2, -width/2)
+        self.model_matrix.add_scale(width, height, width)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
+        self.shader.set_mat_shine(13)
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.5, 0.5, 0.5))
+        self.cube.set_vertices(self.shader)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
 
     def draw_lin_moving_cube(self):
         self.model_matrix.push_matrix()
@@ -170,7 +191,7 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
         self.shader.set_mat_shine(13)
-        self.shader.set_mat_ambient(0.1, 0.1, 0.1)
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.1, 0.1))
         self.cube.set_vertices(self.shader)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -180,7 +201,10 @@ class GraphicsProgram3D:
         floor_thickness = 0.2
 
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(floor_dim / 2, - floor_thickness / 2, - floor_dim / 2)
+        trans_x = self.sphere_width / 2
+        trans_y = - self.sphere_width / 2
+        trans_z = (- floor_thickness / 2) + (self.sphere_width / 2)
+        self.model_matrix.add_translation(trans_x, trans_z, trans_y)
         self.model_matrix.add_scale(floor_dim, floor_thickness, floor_dim)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -192,35 +216,37 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_sphere(self):
+    def draw_sky_sphere(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(2, 5, -5)
+        self.model_matrix.add_translation(self.sphere_width/2, self.sphere_width/2, -self.sphere_width/2)
+        self.model_matrix.add_scale(self.sphere_width, self.sphere_width, self.sphere_width)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.shader.set_mat_diffuse(Base3DObjects.Color(0, 0, 1))
-        self.shader.set_mat_shine(30)
-        self.shader.set_mat_ambient(0, 0, 0.2)
+        self.shader.set_mat_diffuse(Base3DObjects.Color(1, 1, 1))
+        self.shader.set_mat_shine(13)
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.5, 0.5, 0.5))
 
-        self.sphere.set_vertices(self.shader)
-        self.sphere.draw()
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_metallic_sphere(self):
+    def draw_model_person(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(2, 1, -5)
+        self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, -self.sphere_width / 2)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.obj_metallic_sphere.draw(self.shader)
+        self.obj_model_person.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-    def draw_model_2(self):
+    def draw_model_ghost(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(5, 1, -2)
+        self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.obj_model_2.draw(self.shader)
+        self.obj_model_ghost.draw(self.shader)
         self.model_matrix.pop_matrix()
-
 
     def program_loop(self):
         exiting = False

@@ -1,5 +1,6 @@
 import Base3DObjects
 import math
+import numpy
 
 class LinearMotion:
     def __init__(self,
@@ -66,3 +67,12 @@ class BezierMotion:
 
             out_pos = Base3DObjects.Point(x, y, z)
         return out_pos
+
+    def get_vertex_list(self):
+        v_list = []
+        for x in numpy.linspace(self.start_time, self.end_time, 30):
+            pos = self.get_current_pos(x)
+            v_list.extend([pos.x/10, pos.y/10, pos.z/10])
+        v_list = [0.3, 0.4, 0.1, 0.0, 0.2, 0.4]
+        print(v_list)
+        return v_list
