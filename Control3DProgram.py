@@ -54,10 +54,10 @@ class GraphicsProgram3D:
         self.lin_motion = Motion.LinearMotion(Base3DObjects.Point(0, 5, -1), Base3DObjects.Point(0, 0, -1), 5.0, 10.0)
         self.model_pos_lin = Base3DObjects.Point(0,0,0)
 
-        self.bez_motion = Motion.BezierMotion(Base3DObjects.Point(0, 3, -5),
-                                                 Base3DObjects.Point(0, 5, -10),
-                                                 Base3DObjects.Point(0, 3, -15),
-                                                 Base3DObjects.Point(0, 7, - 20),
+        self.bez_motion = Motion.BezierMotion(Base3DObjects.Point(0, 0, 0),
+                                                 Base3DObjects.Point(10, 0, -15),
+                                                 Base3DObjects.Point(20, 0, -15),
+                                                 Base3DObjects.Point(20, 0, 0),
                                                  5.0, 10.0)
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
 
@@ -142,18 +142,27 @@ class GraphicsProgram3D:
         self.shader.set_global_ambient(1, 1, 1)
         self.shader.set_eye_location(self.view_matrix.eye)
 
+        ######### Translated to middle of sphere #########
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, - self.sphere_width / 2)
+
         # Floor
         self.shader.set_using_texture(1.0)
         Texture.set_diffuse_tex(self.shader, self.texture_wood)
         Texture.set_specular_tex(self.shader, self.texture_wood)
         self.draw_floor()
 
-        # # objects
-        Texture.set_diffuse_tex(self.shader, self.texture_sphere)
-        self.draw_sky_sphere()
         self.shader.set_using_texture(0.0)
         self.draw_model_person()
         self.draw_model_ghost()
+
+        self.model_matrix.pop_matrix()
+        ######### Translated to middle of sphere #########
+
+        # Sky sphere
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_sphere)
+        self.draw_sky_sphere()
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -201,10 +210,7 @@ class GraphicsProgram3D:
         floor_thickness = 0.2
 
         self.model_matrix.push_matrix()
-        trans_x = self.sphere_width / 2
-        trans_y = - self.sphere_width / 2
-        trans_z = (- floor_thickness / 2) + (self.sphere_width / 2)
-        self.model_matrix.add_translation(trans_x, trans_z, trans_y)
+        self.model_matrix.add_translation(y = - floor_thickness / 2)
         self.model_matrix.add_scale(floor_dim, floor_thickness, floor_dim)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -232,7 +238,7 @@ class GraphicsProgram3D:
 
     def draw_model_person(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, -self.sphere_width / 2)
+        self.model_matrix.add_translation(x = 3)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -241,11 +247,16 @@ class GraphicsProgram3D:
 
     def draw_model_ghost(self):
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation()
+
+        self.model_matrix.push_matrix()
         self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.obj_model_ghost.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
         self.model_matrix.pop_matrix()
 
     def program_loop(self):
