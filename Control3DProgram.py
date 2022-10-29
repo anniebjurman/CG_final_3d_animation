@@ -51,18 +51,16 @@ class GraphicsProgram3D:
         self.time_elapsed = 0
 
         #motion
-        self.lin_motion = Motion.LinearMotion(Base3DObjects.Point(0, 5, -1), Base3DObjects.Point(0, 0, -1), 5.0, 10.0)
-        self.model_pos_lin = Base3DObjects.Point(0,0,0)
-
-        self.bez_motion = Motion.BezierMotion(Base3DObjects.Point(-20, 1, 0),
-                                                 Base3DObjects.Point(-5, 10, -20),
-                                                 Base3DObjects.Point(15, 5, -20),
-                                                 Base3DObjects.Point(20, 1, 0),
-                                                 5.0, 10.0)
+        control_points = [Base3DObjects.Point(-20, 1, 0),
+                          Base3DObjects.Point(-5, 10, -20),
+                          Base3DObjects.Point(15, 10, -20),
+                          Base3DObjects.Point(20, 1, 0),
+                          Base3DObjects.Point(-5, 10, 20),
+                          Base3DObjects.Point(-20, 1, 0)]
+        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0)
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
 
         # Other objects
-        self.beizer_obj = Base3DObjects.BeizerObject(self.bez_motion)
         self.obj_model_person = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person.obj")
         self.obj_model_ghost = obj3DLoading.load_obj_file(sys.path[0] + "/models", "ghost2.obj")
 
@@ -99,8 +97,7 @@ class GraphicsProgram3D:
         self.angle += math.pi * self.delta_time
         self.angle_deg = self.angle * 57.2957795
 
-        self.model_pos_lin = self.lin_motion.get_current_pos(self.time_elapsed)
-        self.model_pos_bez= self.bez_motion.get_current_pos(self.time_elapsed)
+        self.model_pos_bez= self.beizer_obj.get_current_pos(self.time_elapsed)
 
         # specific_time = 7.5
         # self.model_pos_lin = self.lin_motion.get_current_pos(specific_time)
@@ -156,8 +153,7 @@ class GraphicsProgram3D:
         self.draw_mercury()
         self.draw_jupiter()
         self.draw_moon()
-
-        self.shader.set_using_texture(0.0)
+        self.draw_bez_moving_cube()
         self.draw_model_person()
 
         self.model_matrix.pop_matrix()
@@ -173,24 +169,15 @@ class GraphicsProgram3D:
 
         pygame.display.flip()
 
-    def draw_lin_moving_cube(self):
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.model_pos_lin.x, self.model_pos_lin.y, self.model_pos_lin.z)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
-        self.shader.set_mat_shine(13)
-        self.shader.set_mat_ambient(0.1, 0.1, 0.1)
-        self.cube.set_vertices(self.shader)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
 
     def draw_bez_moving_cube(self):
+        self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
+        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 0.0, 0.0))
         self.shader.set_mat_shine(13)
-        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.1, 0.1))
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.0, 0.0))
         self.cube.set_vertices(self.shader)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -227,6 +214,7 @@ class GraphicsProgram3D:
         self.model_matrix.pop_matrix()
 
     def draw_model_person(self):
+        self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(x = 3)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)

@@ -280,13 +280,3 @@ class MeshModel:
             shader.set_attribute_buffer(self.vertex_buffer_ids[mesh_id])
             glDrawArrays(GL_TRIANGLES, 0, self.vertex_counts[mesh_id])
             glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-class BeizerObject:
-    def __init__(self, beizer_motion):
-        self.beizer_motion = beizer_motion
-        self.position_array = self.beizer_motion.get_vertex_list()
-
-    def set_vertices(self, shader):
-        shader.set_position_attribute(self.position_array)
-        # shader.set_normal_attribute(self.normal_array)
-        # shader.set_uv_attribute(self.uv_array)

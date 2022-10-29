@@ -1,3 +1,6 @@
+from distutils.util import convert_path
+from lib2to3.pytree import Base
+from tracemalloc import start
 import Base3DObjects
 import math
 import numpy
@@ -76,3 +79,51 @@ class BezierMotion:
         v_list = [0.3, 0.4, 0.1, 0.0, 0.2, 0.4]
         print(v_list)
         return v_list
+
+class BeizerObject:
+    def __init__(self, control_points, start_time, end_time):
+        self.beizer_motions = []
+        self.times = []
+
+        if len(control_points) == 4:
+            self.beizer_motions.append(BezierMotion(control_points[0],
+                                              control_points[1],
+                                              control_points[2],
+                                              control_points[3],
+                                              start_time,
+                                              end_time))
+            self.times.extend([start_time, end_time])
+
+        elif len(control_points) == 6:
+            middle_time = start_time + ((end_time - start_time) / 2)
+            self.times.extend([start_time, middle_time, end_time])
+
+            self.beizer_motions.append(BezierMotion(control_points[0],
+                                              control_points[1],
+                                              control_points[2],
+                                              control_points[3],
+                                              start_time,
+                                              middle_time))
+
+            # calc b2
+            v  = control_points[2].__sub__(control_points[3])
+            v_scalar = v.__mul__(2)
+            b2 = Base3DObjects.Point(control_points[3].x + v_scalar.x,
+                                     control_points[3].y + v_scalar.y,
+                                     control_points[3].z + v_scalar.z)
+
+            self.beizer_motions.append(BezierMotion(control_points[3],
+                                                    b2,
+                                                    control_points[4],
+                                                    control_points[5],
+                                                    middle_time,
+                                                    end_time))
+
+    def get_current_pos(self, curr_time: float):
+        if len(self.beizer_motions) == 1:
+            return self.beizer_motions[0].get_current_pos(curr_time)
+        elif len(self.beizer_motions) == 2:
+            if curr_time <= self.times[1]:
+                return self.beizer_motions[0].get_current_pos(curr_time)
+            elif curr_time > self.times[1]:
+                return self.beizer_motions[1].get_current_pos(curr_time)
