@@ -119,6 +119,7 @@ class GraphicsProgram3D:
 
         if self.time_elapsed > self.last_start_particle_time:
             self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, self.time_elapsed)
+            # TODO: clear list when the particles have reached the end.
 
         # specific_time = 7.5
         # self.model_pos_lin = self.lin_motion.get_current_pos(specific_time)
@@ -139,7 +140,7 @@ class GraphicsProgram3D:
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # Walk forward/backwards/left/right
-        walk_speed = self.delta_time * 6
+        walk_speed = self.delta_time * 10
         if self.UP_key_w:
             self.view_matrix.walk(0, 0, -walk_speed)
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
@@ -195,8 +196,9 @@ class GraphicsProgram3D:
 
     def generate_linjear_motions(self, num, start_time):
         start_time = start_time
-        end_time = start_time + 10
+        end_time = start_time + 15
         rand = random.Random()
+
         for _ in range(num):
             rand_y = rand.uniform(-30, 30)
             rand_z = rand.uniform(30, -30)
@@ -207,8 +209,8 @@ class GraphicsProgram3D:
             # while rand_z < 10 and rand_z > -10:
             #     rand_z = rand.uniform(-80, 80)
 
-            pos1 = Base3DObjects.Point(-80, rand_y, rand_z)
-            pos2 = Base3DObjects.Point(80, rand_y, rand_z)
+            pos1 = Base3DObjects.Point(-100, rand_y, rand_z)
+            pos2 = Base3DObjects.Point(100, rand_y, rand_z)
             motion = Motion.LinearMotion(pos1, pos2, start_time, end_time)
 
             self.linjear_motions.append(motion)
@@ -324,7 +326,6 @@ class GraphicsProgram3D:
 
 
     # Planets
-
     def draw_solar_system(self):
         #sun
         self.model_matrix.push_matrix()
@@ -333,54 +334,42 @@ class GraphicsProgram3D:
         self.draw_sun()
 
         #mercury
-        self.model_matrix.add_rotation(self.angle_deg, "y")
-        self.model_matrix.add_translation(x = 5)
+        self.model_matrix.add_rotation(self.angle_deg * 3, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_mercury()
 
         #venus
-        self.model_matrix.add_translation(x = 2)
+        self.model_matrix.add_rotation(- self.angle_deg / 2 , "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_venus()
 
         #earth
-        self.model_matrix.add_translation(x = 4)
+        self.model_matrix.add_rotation(- self.angle_deg / 2, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_earth()
 
-        ######## moon around earth? #########
-        # self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(0, 0, -5)
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.draw_earth()
-        # self.model_matrix.add_translation(0, 0, -2)
-        # self.model_matrix.add_rotation(self.angle_deg, "y")
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.draw_moon()
-        # self.model_matrix.pop_matrix()
-
         #mars
-        self.model_matrix.add_translation(x = 3)
+        self.model_matrix.add_rotation(- self.angle_deg, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_mars()
 
         #jupiter
-        self.model_matrix.add_translation(x = 6)
+        self.model_matrix.add_rotation(- self.angle_deg * 0.3, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_jupiter()
 
         #saturn
-        self.model_matrix.add_translation(x = 6.5)
+        self.model_matrix.add_rotation(- self.angle_deg * 0.3, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_saturn()
 
         #neptune
-        self.model_matrix.add_translation(x = 5)
+        self.model_matrix.add_rotation(self.angle_deg * 0.2, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_neptune()
 
         #uranus
-        self.model_matrix.add_translation(x = 3)
+        self.model_matrix.add_rotation(self.angle_deg * 0.2, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.draw_uranus()
 
@@ -391,7 +380,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_mercury)
         Texture.set_specular_tex(self.shader, self.texture_mercury)
         self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(2, 0, 0)
+        self.model_matrix.add_translation(x = 5)
         self.model_matrix.add_scale(0.3, 0.3, 0.3)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -404,6 +393,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_venus)
         Texture.set_specular_tex(self.shader, self.texture_venus)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 7)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -416,6 +406,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_earth)
         Texture.set_specular_tex(self.shader, self.texture_earth)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 11)
         self.model_matrix.add_scale(0.7, 0.7, 0.7)
         self.model_matrix.add_rotation(self.angle_deg, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
@@ -429,6 +420,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_mars)
         Texture.set_specular_tex(self.shader, self.texture_mars)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 14)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -441,6 +433,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_jupiter)
         Texture.set_specular_tex(self.shader, self.texture_jupiter)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 20)
         self.model_matrix.add_scale(2.5, 2.5, 2.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -453,6 +446,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_saturn)
         Texture.set_specular_tex(self.shader, self.texture_saturn)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 26.5)
         self.model_matrix.add_scale(2, 2, 2)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -465,6 +459,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_uranus)
         Texture.set_specular_tex(self.shader, self.texture_uranus)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 31.6)
         self.model_matrix.add_scale(0.9, 0.9, 0.9)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -477,6 +472,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_neptune)
         Texture.set_specular_tex(self.shader, self.texture_neptune)
         self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(x = 34.5)
         self.model_matrix.add_scale(0.9, 0.9, 0.9)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
