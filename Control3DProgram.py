@@ -61,9 +61,9 @@ class GraphicsProgram3D:
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
 
         # Other objects
-        self.obj_model_person = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person.obj")
+        self.obj_model_person_idea = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person_idea.obj")
         self.obj_model_person_sitting = obj3DLoading.load_obj_file(sys.path[0] + "/models", "person_sitting.obj")
-        self.obj_model_spikeball = obj3DLoading.load_obj_file(sys.path[0] + "/models", "spikeball_2.obj")
+        self.obj_model_spikeball = obj3DLoading.load_obj_file(sys.path[0] + "/models", "spikeball_3.obj")
         self.obj_model_negative_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "negative_text.obj")
         self.obj_model_positive_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "positive_text.obj")
 
@@ -156,8 +156,8 @@ class GraphicsProgram3D:
         self.draw_mercury()
         self.draw_jupiter()
         self.draw_moon()
-        self.draw_bez_moving_cube()
-        self.draw_model_person()
+        self.draw_bez_moving_particle()
+        self.draw_model_person_idea()
         self.draw_model_spike_ball()
         self.draw_model_person_sitting()
         self.draw_model_negative_text()
@@ -177,16 +177,16 @@ class GraphicsProgram3D:
         pygame.display.flip()
 
 
-    def draw_bez_moving_cube(self):
+    def draw_bez_moving_particle(self):
         self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
+        self.model_matrix.add_scale(0.1, 0.1, 0.1)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 0.0, 0.0))
-        self.shader.set_mat_shine(13)
-        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.0, 0.0))
-        self.cube.set_vertices(self.shader)
-        self.cube.draw()
+        # self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 0.0, 0.0))
+        # self.shader.set_mat_shine(13)
+        # self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.0, 0.0))
+        self.obj_model_spikeball.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_floor(self):
@@ -220,14 +220,15 @@ class GraphicsProgram3D:
         self.opt_sphere.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_model_person(self):
+    def draw_model_person_idea(self):
         self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(x = 3)
+        self.model_matrix.add_rotation(90, "y")
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.obj_model_person.draw(self.shader)
+        self.obj_model_person_idea.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_model_person_sitting(self):
@@ -255,6 +256,7 @@ class GraphicsProgram3D:
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(3, 5, 0)
         self.model_matrix.add_scale(0.3, 0.3, 0.3)
+        self.model_matrix.add_rotation(90, "y")
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.obj_model_positive_text.draw(self.shader)
