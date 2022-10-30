@@ -1,5 +1,6 @@
 from lib2to3.pytree import Base
 import math
+from multiprocessing import current_process
 import sys
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -52,14 +53,14 @@ class GraphicsProgram3D:
         self.clock.tick()
         self.time_elapsed = 0
 
-        #motion
-        control_points = [Base3DObjects.Point(-20, 1, 0),
-                          Base3DObjects.Point(-5, 10, -20),
-                          Base3DObjects.Point(15, 10, -20),
-                          Base3DObjects.Point(20, 1, 0),
-                          Base3DObjects.Point(-5, 10, 20),
-                          Base3DObjects.Point(-20, 1, 0)]
-        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0)
+        # Motion
+        # Rocket
+        control_points = [Base3DObjects.Point(-60, -10, -60),
+                          Base3DObjects.Point(-20, -5, -20),
+                          Base3DObjects.Point(10, 10, 10),
+                          Base3DObjects.Point(20, 1, 0)]
+
+        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0, 0.01, 0.5)
 
         # particles
         self.linjear_motions = []
@@ -73,6 +74,7 @@ class GraphicsProgram3D:
         self.obj_model_spikeball = obj3DLoading.load_obj_file(sys.path[0] + "/models", "spikeball_3.obj")
         self.obj_model_negative_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "negative_text.obj")
         self.obj_model_positive_text = obj3DLoading.load_obj_file(sys.path[0] + "/models", "positive_text.obj")
+        self.obj_model_rocket = obj3DLoading.load_obj_file(sys.path[0] + "/models", "rocket.obj")
 
         # Angles
         self.angle = 0
@@ -106,8 +108,6 @@ class GraphicsProgram3D:
         self.delta_time = self.clock.tick() / 1000
         self.angle += math.pi * self.delta_time
         self.angle_deg = self.angle * 57.2957795
-
-        self.model_pos_bez= self.beizer_obj.get_current_pos(self.time_elapsed)
 
         if self.time_elapsed > self.last_start_particle_time:
             self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, self.time_elapsed)
@@ -166,13 +166,13 @@ class GraphicsProgram3D:
         self.draw_mercury()
         self.draw_jupiter()
         self.draw_moon()
-        # self.draw_bez_moving_particle()
         self.draw_model_person_idea()
-        self.draw_model_spike_ball()
         self.draw_model_person_sitting()
         self.draw_model_negative_text()
         self.draw_model_positive_text()
         self.draw_lin_moving_particles()
+        # self.draw_model_rocket()
+        self.draw_bez_moving_rocket()
 
         self.model_matrix.pop_matrix()
         ######### Translated to middle of sphere #########
@@ -206,18 +206,20 @@ class GraphicsProgram3D:
             motion = Motion.LinearMotion(pos1, pos2, start_time, end_time)
 
             self.linjear_motions.append(motion)
-            start_time += 0.5
-            end_time += 0.5
+            start_time += 0.3
+            end_time += 0.3
 
         return start_time
 
-    def draw_bez_moving_particle(self):
+    def draw_bez_moving_rocket(self):
+        curr_pos = self.beizer_obj.get_current_pos(self.time_elapsed)
+        curr_scale = self.beizer_obj.get_current_scale(self.time_elapsed)
         self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
-        self.model_matrix.add_scale(0.1, 0.1, 0.1)
+        self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
+        self.model_matrix.add_scale(curr_scale, curr_scale, curr_scale)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.obj_model_spikeball.draw(self.shader)
+        self.obj_model_rocket.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_lin_moving_particles(self):
@@ -304,14 +306,14 @@ class GraphicsProgram3D:
         self.obj_model_positive_text.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-    def draw_model_spike_ball(self):
+    def draw_model_rocket(self):
         self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(x = 20)
-        # self.model_matrix.add_scale(0.1, 0.1, 0.1)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.obj_model_spikeball.draw(self.shader)
+        self.obj_model_rocket.draw(self.shader)
         self.model_matrix.pop_matrix()
 
     def draw_mars(self):

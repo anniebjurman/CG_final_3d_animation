@@ -81,9 +81,13 @@ class BezierMotion:
         return v_list
 
 class BeizerObject:
-    def __init__(self, control_points, start_time, end_time):
+    def __init__(self, control_points, start_time, end_time, start_scale, end_scale):
         self.beizer_motions = []
         self.times = []
+        self.start_scale = start_scale
+        self.end_scale = end_scale
+        self.start_time = start_time
+        self.end_time = end_time
 
         if len(control_points) == 4:
             self.beizer_motions.append(BezierMotion(control_points[0],
@@ -127,3 +131,16 @@ class BeizerObject:
                 return self.beizer_motions[0].get_current_pos(curr_time)
             elif curr_time > self.times[1]:
                 return self.beizer_motions[1].get_current_pos(curr_time)
+
+    def get_current_scale(self, curr_time):
+
+        if curr_time < self.start_time:
+            return self.start_scale
+        elif curr_time > self.end_time:
+            return self.end_scale
+        else:
+            tot_time = self.end_time - self.start_time
+            part_time = (curr_time - self.start_time) / tot_time
+
+            curr_scale = (1 - part_time) * self.start_scale + part_time * self.end_scale
+            return curr_scale
