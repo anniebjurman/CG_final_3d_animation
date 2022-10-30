@@ -55,12 +55,21 @@ class GraphicsProgram3D:
 
         # Motion
         # Rocket
-        control_points = [Base3DObjects.Point(-60, -10, -60),
-                          Base3DObjects.Point(-20, -5, -20),
-                          Base3DObjects.Point(10, 10, 10),
-                          Base3DObjects.Point(20, 1, 0)]
+        control_points = [Base3DObjects.Point(-40, -10, -60),
+                          Base3DObjects.Point(-30, -10, -50),
+                          Base3DObjects.Point(-10, -5, -50),
+                          Base3DObjects.Point(0, 0, -40),
+                          Base3DObjects.Point(10, 0, -20),
+                          Base3DObjects.Point(15, 0, -10)]
 
-        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
+        self.beizer_obj_rocket = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
+
+        # camera
+        control_points = [Base3DObjects.Point(0, 0, 10),
+                          Base3DObjects.Point(-10, 20, 0),
+                          Base3DObjects.Point(-40, 20, 0),
+                          Base3DObjects.Point(0, 0, -20)]
+        self.beizer_obj_camera = Motion.BeizerObject(control_points, 5.0, 20.0)
 
         # particles
         self.num_particles = 60
@@ -78,7 +87,7 @@ class GraphicsProgram3D:
 
         # Angles
         self.angle = 0
-        self.angle_turn = 0.5
+        self.angle_turn = 0.7
         self.delta_time = None
         self.angle_deg = None
 
@@ -122,6 +131,14 @@ class GraphicsProgram3D:
             self.linjear_motions_1, self.last_start_particle_time = self.generate_linjear_motions(self.num_particles,
                                                                                                   self.time_elapsed)
 
+        # Camera
+        new_pos = self.beizer_obj_camera.get_current_pos(self.time_elapsed)
+        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
+                                                   self.sphere_width / 2 + new_pos.y,
+                                                   - self.sphere_width / 2 + new_pos.z)
+        self.shader.set_view_matrix(self.view_matrix.get_matrix())
+
+
         # look up/down/left/right
         if self.UP_key_right:
             self.view_matrix.turn(-self.angle_turn)
@@ -137,7 +154,7 @@ class GraphicsProgram3D:
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # Walk forward/backwards/left/right
-        walk_speed = self.delta_time * 10
+        walk_speed = self.delta_time * 12
         if self.UP_key_w:
             self.view_matrix.walk(0, 0, -walk_speed)
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
@@ -218,8 +235,8 @@ class GraphicsProgram3D:
         return linjear_motions, start_time
 
     def draw_bez_moving_rocket(self):
-        curr_pos = self.beizer_obj.get_current_pos(self.time_elapsed)
-        curr_scale = self.beizer_obj.get_current_scale(self.time_elapsed)
+        curr_pos = self.beizer_obj_rocket.get_current_pos(self.time_elapsed)
+        curr_scale = self.beizer_obj_rocket.get_current_scale(self.time_elapsed)
         self.shader.set_using_texture(0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)

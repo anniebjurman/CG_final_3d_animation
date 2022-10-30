@@ -81,7 +81,7 @@ class BezierMotion:
         return v_list
 
 class BeizerObject:
-    def __init__(self, control_points, start_time, end_time, start_scale, end_scale):
+    def __init__(self, control_points, start_time, end_time, start_scale = None, end_scale = None):
         self.beizer_motions = []
         self.times = []
         self.start_scale = start_scale
@@ -110,6 +110,7 @@ class BeizerObject:
                                               middle_time))
 
             # calc b2
+            # TODO: Fix, maybe check if negative and do...
             v  = control_points[2].__sub__(control_points[3])
             v_scalar = v.__mul__(2)
             b2 = Base3DObjects.Point(control_points[3].x + v_scalar.x,
@@ -133,7 +134,6 @@ class BeizerObject:
                 return self.beizer_motions[1].get_current_pos(curr_time)
 
     def get_current_scale(self, curr_time):
-
         if curr_time < self.start_time:
             return self.start_scale
         elif curr_time > self.end_time:
