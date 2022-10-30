@@ -63,9 +63,9 @@ class GraphicsProgram3D:
         self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
 
         # particles
-        self.linjear_motions = []
-        self.num_particles = 40
-        self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, 0)
+        self.num_particles = 60
+        self.linjear_motions_1, self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, 0)
+        self.linjear_motions_2 = []
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
 
         # Other objects
@@ -118,12 +118,9 @@ class GraphicsProgram3D:
         self.angle_deg = self.angle * 57.2957795
 
         if self.time_elapsed > self.last_start_particle_time:
-            self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, self.time_elapsed)
-            # TODO: clear list when the particles have reached the end.
-
-        # specific_time = 7.5
-        # self.model_pos_lin = self.lin_motion.get_current_pos(specific_time)
-        # self.model_pos_bez= self.bez_motion.get_current_pos(specific_time)
+            self.linjear_motions_2 = self.linjear_motions_1
+            self.linjear_motions_1, self.last_start_particle_time = self.generate_linjear_motions(self.num_particles,
+                                                                                                  self.time_elapsed)
 
         # look up/down/left/right
         if self.UP_key_right:
@@ -198,10 +195,11 @@ class GraphicsProgram3D:
         start_time = start_time
         end_time = start_time + 15
         rand = random.Random()
+        linjear_motions = []
 
         for _ in range(num):
-            rand_y = rand.uniform(-30, 30)
-            rand_z = rand.uniform(30, -30)
+            rand_y = rand.uniform(-40, 40)
+            rand_z = rand.uniform(40, -40)
 
             # while rand_y < 10 and rand_y > -10:
             #     rand_y = rand.uniform(-80, 80)
@@ -213,11 +211,11 @@ class GraphicsProgram3D:
             pos2 = Base3DObjects.Point(100, rand_y, rand_z)
             motion = Motion.LinearMotion(pos1, pos2, start_time, end_time)
 
-            self.linjear_motions.append(motion)
+            linjear_motions.append(motion)
             start_time += 0.3
             end_time += 0.3
 
-        return start_time
+        return linjear_motions, start_time
 
     def draw_bez_moving_rocket(self):
         curr_pos = self.beizer_obj.get_current_pos(self.time_elapsed)
@@ -232,7 +230,16 @@ class GraphicsProgram3D:
 
     def draw_lin_moving_particles(self):
         self.shader.set_using_texture(0.0)
-        for motion in self.linjear_motions:
+        for motion in self.linjear_motions_1:
+            curr_pos = motion.get_current_pos(self.time_elapsed)
+            self.model_matrix.push_matrix()
+            self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
+            self.model_matrix.add_scale(0.1, 0.1, 0.1)
+            self.shader.set_model_matrix(self.model_matrix.matrix)
+            self.obj_model_spikeball.draw(self.shader)
+            self.model_matrix.pop_matrix()
+
+        for motion in self.linjear_motions_2:
             curr_pos = motion.get_current_pos(self.time_elapsed)
             self.model_matrix.push_matrix()
             self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
