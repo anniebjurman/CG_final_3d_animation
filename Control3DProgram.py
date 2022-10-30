@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 import math
 import sys
 from OpenGL.GL import *
@@ -5,6 +6,7 @@ from OpenGL.GLU import *
 
 import pygame
 from pygame.locals import *
+import random
 
 import Matrices
 import Shaders
@@ -58,6 +60,11 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(-5, 10, 20),
                           Base3DObjects.Point(-20, 1, 0)]
         self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0)
+
+        # particles
+        self.linjear_motions = []
+        self.num_particles = 40
+        self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, 0)
         self.model_pos_bez = Base3DObjects.Point(0,0,0)
 
         # Other objects
@@ -69,7 +76,7 @@ class GraphicsProgram3D:
 
         # Angles
         self.angle = 0
-        self.angle_turn = 0.1
+        self.angle_turn = 0.5
         self.delta_time = None
         self.angle_deg = None
 
@@ -101,6 +108,9 @@ class GraphicsProgram3D:
         self.angle_deg = self.angle * 57.2957795
 
         self.model_pos_bez= self.beizer_obj.get_current_pos(self.time_elapsed)
+
+        if self.time_elapsed > self.last_start_particle_time:
+            self.last_start_particle_time = self.generate_linjear_motions(self.num_particles, self.time_elapsed)
 
         # specific_time = 7.5
         # self.model_pos_lin = self.lin_motion.get_current_pos(specific_time)
@@ -156,12 +166,13 @@ class GraphicsProgram3D:
         self.draw_mercury()
         self.draw_jupiter()
         self.draw_moon()
-        self.draw_bez_moving_particle()
+        # self.draw_bez_moving_particle()
         self.draw_model_person_idea()
         self.draw_model_spike_ball()
         self.draw_model_person_sitting()
         self.draw_model_negative_text()
         self.draw_model_positive_text()
+        self.draw_lin_moving_particles()
 
         self.model_matrix.pop_matrix()
         ######### Translated to middle of sphere #########
@@ -176,6 +187,29 @@ class GraphicsProgram3D:
 
         pygame.display.flip()
 
+    def generate_linjear_motions(self, num, start_time):
+        start_time = start_time
+        end_time = start_time + 10
+        rand = random.Random()
+        for _ in range(num):
+            rand_y = rand.uniform(-30, 30)
+            rand_z = rand.uniform(30, -30)
+
+            # while rand_y < 10 and rand_y > -10:
+            #     rand_y = rand.uniform(-80, 80)
+
+            # while rand_z < 10 and rand_z > -10:
+            #     rand_z = rand.uniform(-80, 80)
+
+            pos1 = Base3DObjects.Point(-80, rand_y, rand_z)
+            pos2 = Base3DObjects.Point(80, rand_y, rand_z)
+            motion = Motion.LinearMotion(pos1, pos2, start_time, end_time)
+
+            self.linjear_motions.append(motion)
+            start_time += 0.5
+            end_time += 0.5
+
+        return start_time
 
     def draw_bez_moving_particle(self):
         self.shader.set_using_texture(0.0)
@@ -183,11 +217,19 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(self.model_pos_bez.x, self.model_pos_bez.y, self.model_pos_bez.z)
         self.model_matrix.add_scale(0.1, 0.1, 0.1)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 0.0, 0.0))
-        # self.shader.set_mat_shine(13)
-        # self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.0, 0.0))
         self.obj_model_spikeball.draw(self.shader)
         self.model_matrix.pop_matrix()
+
+    def draw_lin_moving_particles(self):
+        self.shader.set_using_texture(0.0)
+        for motion in self.linjear_motions:
+            curr_pos = motion.get_current_pos(self.time_elapsed)
+            self.model_matrix.push_matrix()
+            self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
+            self.model_matrix.add_scale(0.1, 0.1, 0.1)
+            self.shader.set_model_matrix(self.model_matrix.matrix)
+            self.obj_model_spikeball.draw(self.shader)
+            self.model_matrix.pop_matrix()
 
     def draw_floor(self):
         floor_dim = 10
