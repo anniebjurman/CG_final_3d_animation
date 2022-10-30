@@ -28,7 +28,7 @@ class GraphicsProgram3D:
 
         self.model_matrix = Matrices.ModelMatrix()
 
-        self.sphere_width = 80
+        self.sphere_width = 100
 
         self.projection_matrix = Matrices.ProjectionMatrix()
         self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 150)
@@ -60,7 +60,7 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(10, 10, 10),
                           Base3DObjects.Point(20, 1, 0)]
 
-        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0, 0.01, 0.5)
+        self.beizer_obj = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
 
         # particles
         self.linjear_motions = []
@@ -98,15 +98,23 @@ class GraphicsProgram3D:
         self.texture_floor = Texture.load_texture(sys.path[0] + "/textures/tex_metallic_floor_2.jpeg")
         self.texture_sphere = Texture.load_texture(sys.path[0] + "/textures/tex_sphere_6.png")
         self.texture_box = Texture.load_texture(sys.path[0] + "/textures/tex_metallic.jpeg")
-        self.texture_mars = Texture.load_texture(sys.path[0] + "/textures/tex_mars.jpeg")
+        # Planets
+        self.texture_sun = Texture.load_texture(sys.path[0] + "/textures/tex_sun.jpeg")
         self.texture_mercury = Texture.load_texture(sys.path[0] + "/textures/tex_mercury.jpeg")
+        self.texture_venus = Texture.load_texture(sys.path[0] + "/textures/tex_venus.jpeg")
+        self.texture_earth = Texture.load_texture(sys.path[0] + "/textures/tex_earth.jpeg")
+        self.texture_mars = Texture.load_texture(sys.path[0] + "/textures/tex_mars.jpeg")
         self.texture_jupiter = Texture.load_texture(sys.path[0] + "/textures/tex_jupiter.jpeg")
+        self.texture_saturn = Texture.load_texture(sys.path[0] + "/textures/tex_saturn.jpeg")
+        self.texture_neptune = Texture.load_texture(sys.path[0] + "/textures/tex_neptune.jpeg")
+        self.texture_uranus = Texture.load_texture(sys.path[0] + "/textures/tex_uranus.jpeg")
         self.texture_moon = Texture.load_texture(sys.path[0] + "/textures/tex_moon.jpeg")
 
     def update(self):
         self.time_elapsed = pygame.time.get_ticks() / 1000
         self.delta_time = self.clock.tick() / 1000
-        self.angle += math.pi * self.delta_time
+        # self.angle += math.pi * self.delta_time
+        self.angle = math.pi * self.time_elapsed / 10
         self.angle_deg = self.angle * 57.2957795
 
         if self.time_elapsed > self.last_start_particle_time:
@@ -162,10 +170,8 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, - self.sphere_width / 2)
 
         self.draw_floor()
-        self.draw_mars()
-        self.draw_mercury()
-        self.draw_jupiter()
-        self.draw_moon()
+        self.draw_solar_system()
+
         self.draw_model_person_idea()
         self.draw_model_person_sitting()
         self.draw_model_negative_text()
@@ -316,17 +322,68 @@ class GraphicsProgram3D:
         self.obj_model_rocket.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-    def draw_mars(self):
-        self.shader.set_using_texture(1.0)
-        Texture.set_diffuse_tex(self.shader, self.texture_mars)
-        Texture.set_specular_tex(self.shader, self.texture_mars)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(x = -5, y = 10)
-        self.model_matrix.add_scale(1.5, 1.5, 1.5)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.opt_sphere.set_vertices(self.shader)
-        self.opt_sphere.draw()
+    # Planets
+
+    def draw_solar_system(self):
+        #sun
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(-20, -5, -50)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_sun()
+
+        #mercury
+        self.model_matrix.add_rotation(self.angle_deg, "y")
+        self.model_matrix.add_translation(x = 5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_mercury()
+
+        #venus
+        self.model_matrix.add_translation(x = 2)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_venus()
+
+        #earth
+        self.model_matrix.add_translation(x = 4)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_earth()
+
+        ######## moon around earth? #########
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(0, 0, -5)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.draw_earth()
+        # self.model_matrix.add_translation(0, 0, -2)
+        # self.model_matrix.add_rotation(self.angle_deg, "y")
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.draw_moon()
+        # self.model_matrix.pop_matrix()
+
+        #mars
+        self.model_matrix.add_translation(x = 3)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_mars()
+
+        #jupiter
+        self.model_matrix.add_translation(x = 6)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_jupiter()
+
+        #saturn
+        self.model_matrix.add_translation(x = 6.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_saturn()
+
+        #neptune
+        self.model_matrix.add_translation(x = 5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_neptune()
+
+        #uranus
+        self.model_matrix.add_translation(x = 3)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.draw_uranus()
+
         self.model_matrix.pop_matrix()
 
     def draw_mercury(self):
@@ -334,7 +391,45 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_mercury)
         Texture.set_specular_tex(self.shader, self.texture_mercury)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(x = -1, y = 10)
+        # self.model_matrix.add_translation(2, 0, 0)
+        self.model_matrix.add_scale(0.3, 0.3, 0.3)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_venus(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_venus)
+        Texture.set_specular_tex(self.shader, self.texture_venus)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_earth(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_earth)
+        Texture.set_specular_tex(self.shader, self.texture_earth)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(0.7, 0.7, 0.7)
+        self.model_matrix.add_rotation(self.angle_deg, "y")
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_mars(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_mars)
+        Texture.set_specular_tex(self.shader, self.texture_mars)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.opt_sphere.set_vertices(self.shader)
@@ -346,8 +441,55 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_jupiter)
         Texture.set_specular_tex(self.shader, self.texture_jupiter)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(x = 3, y = 10)
+        self.model_matrix.add_scale(2.5, 2.5, 2.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_saturn(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_saturn)
+        Texture.set_specular_tex(self.shader, self.texture_saturn)
+        self.model_matrix.push_matrix()
         self.model_matrix.add_scale(2, 2, 2)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_uranus(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_uranus)
+        Texture.set_specular_tex(self.shader, self.texture_uranus)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(0.9, 0.9, 0.9)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_neptune(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_neptune)
+        Texture.set_specular_tex(self.shader, self.texture_neptune)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(0.9, 0.9, 0.9)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+
+        self.opt_sphere.set_vertices(self.shader)
+        self.opt_sphere.draw()
+        self.model_matrix.pop_matrix()
+
+    def draw_sun(self):
+        self.shader.set_using_texture(1.0)
+        Texture.set_diffuse_tex(self.shader, self.texture_sun)
+        Texture.set_specular_tex(self.shader, self.texture_sun)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_scale(4, 4, 4)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.opt_sphere.set_vertices(self.shader)
@@ -359,8 +501,7 @@ class GraphicsProgram3D:
         Texture.set_diffuse_tex(self.shader, self.texture_moon)
         Texture.set_specular_tex(self.shader, self.texture_moon)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(y = 5)
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.model_matrix.add_scale(0.3, 0.3, 0.3)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
         self.opt_sphere.set_vertices(self.shader)
