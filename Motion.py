@@ -110,9 +110,8 @@ class BeizerObject:
                                               middle_time))
 
             # calc b2
-            # TODO: Fix, maybe check if negative and do...
             v  = control_points[2].__sub__(control_points[3])
-            v_scalar = v.__mul__(2)
+            v_scalar = v.__mul__(1)
             b2 = Base3DObjects.Point(control_points[3].x + v_scalar.x,
                                      control_points[3].y + v_scalar.y,
                                      control_points[3].z + v_scalar.z)

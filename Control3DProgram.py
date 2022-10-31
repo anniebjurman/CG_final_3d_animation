@@ -37,11 +37,11 @@ class GraphicsProgram3D:
         self.view_matrix = Matrices.ViewMatrix()
 
         # set camera
-        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2, self.sphere_width/2 + 3, -self.sphere_width/2 + 15)             #make 5 a variable dependent on the floor dim
+        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2, self.sphere_width/2 + 3, self.sphere_width/2 + 15)             #make 5 a variable dependent on the floor dim
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # set light
-        self.shader.set_light_position(Base3DObjects.Point(20, 50, -20))
+        self.shader.set_light_position(Base3DObjects.Point(self.sphere_width/4, self.sphere_width/2, self.sphere_width/2))
 
         # General objects
         self.cube = Base3DObjects.Cube()
@@ -182,7 +182,7 @@ class GraphicsProgram3D:
 
         ######### Translated to middle of sphere #########
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, - self.sphere_width / 2)
+        self.model_matrix.add_translation(self.sphere_width / 2, self.sphere_width / 2, self.sphere_width / 2)
 
         self.draw_floor()
         self.draw_solar_system()
@@ -286,7 +286,7 @@ class GraphicsProgram3D:
 
     def draw_sky_sphere(self):
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.sphere_width/2, self.sphere_width/2, -self.sphere_width/2)
+        self.model_matrix.add_translation(self.sphere_width/2, self.sphere_width/2, self.sphere_width/2)
         self.model_matrix.add_scale(self.sphere_width, self.sphere_width, self.sphere_width)
         self.shader.set_model_matrix(self.model_matrix.matrix)
 
