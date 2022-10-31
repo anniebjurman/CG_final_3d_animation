@@ -132,11 +132,11 @@ class GraphicsProgram3D:
                                                                                                   self.time_elapsed)
 
         # Camera
-        new_pos = self.beizer_obj_camera.get_current_pos(self.time_elapsed)
-        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
-                                                   self.sphere_width / 2 + new_pos.y,
-                                                   - self.sphere_width / 2 + new_pos.z)
-        self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        # new_pos = self.beizer_obj_camera.get_current_pos(self.time_elapsed)
+        # self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
+        #                                            self.sphere_width / 2 + new_pos.y,
+        #                                            - self.sphere_width / 2 + new_pos.z)
+        # self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
 
         # look up/down/left/right
