@@ -110,11 +110,9 @@ class BeizerObject:
                                               middle_time))
 
             # calc b2
-            v  = control_points[2].__sub__(control_points[3])
-            v_scalar = v.__mul__(1)
-            b2 = Base3DObjects.Point(control_points[3].x + v_scalar.x,
-                                     control_points[3].y + v_scalar.y,
-                                     control_points[3].z + v_scalar.z)
+            v = control_points[3].__sub__(control_points[2])
+            b2 = control_points[3].__add__(v)
+            print("B2:", b2.to_string())
 
             self.beizer_motions.append(BezierMotion(control_points[3],
                                                     b2,

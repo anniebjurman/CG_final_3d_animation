@@ -55,12 +55,12 @@ class GraphicsProgram3D:
 
         # Motion
         # Rocket
-        control_points = [Base3DObjects.Point(-40, -10, -60),
-                          Base3DObjects.Point(-30, -10, -50),
-                          Base3DObjects.Point(-10, -5, -50),
-                          Base3DObjects.Point(0, 0, -40),
-                          Base3DObjects.Point(10, 0, -20),
-                          Base3DObjects.Point(15, 0, -10)]
+        control_points = [Base3DObjects.Point(-30, -10, -60),
+                          Base3DObjects.Point(-50, -10, -50),
+                          Base3DObjects.Point(-50, -5, -40),
+                          Base3DObjects.Point(0, 0, -30),
+                          Base3DObjects.Point(50, 5, -10),
+                          Base3DObjects.Point(10, 0, -15)]
 
         self.beizer_obj_rocket = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
 
