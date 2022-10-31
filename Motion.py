@@ -141,3 +141,25 @@ class BeizerObject:
 
             curr_scale = (1 - part_time) * self.start_scale + part_time * self.end_scale
             return curr_scale
+
+class CameraTurn:
+    def __init__(self, start_time: float, end_time: float, dir: str, angle_speed: float):
+        self.start_time = start_time
+        self.end_time = end_time
+        self.dir = dir
+        self.angle_speed = angle_speed
+
+    def turn_camera(self, curr_time: float, shader, view_matrix):
+        if curr_time > self.start_time and curr_time < self.end_time:
+            if self.dir == "right":
+                view_matrix.turn(-self.angle_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "left":
+                view_matrix.turn(self.angle_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "up":
+                view_matrix.pitch(-self.angle_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "down":
+                view_matrix.pitch(self.angle_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())

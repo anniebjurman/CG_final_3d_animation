@@ -31,7 +31,7 @@ class GraphicsProgram3D:
         self.sphere_width = 100
 
         self.projection_matrix = Matrices.ProjectionMatrix()
-        self.projection_matrix.set_perspective(60, 1920/1080, 0.8, 150)
+        self.projection_matrix.set_perspective(60, 1920/1080, 1, 300)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.view_matrix = Matrices.ViewMatrix()
@@ -64,12 +64,28 @@ class GraphicsProgram3D:
 
         self.beizer_obj_rocket = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
 
-        # camera
-        control_points = [Base3DObjects.Point(0, 0, 10),
-                          Base3DObjects.Point(-10, 20, 0),
-                          Base3DObjects.Point(-40, 20, 0),
-                          Base3DObjects.Point(0, 0, -20)]
-        self.beizer_obj_camera = Motion.BeizerObject(control_points, 5.0, 20.0)
+        ########## Camera motions ##########
+        # Motion 1
+        self.camera_motions = []
+        control_points = [Base3DObjects.Point(self.sphere_width * 0.8, 20, self.sphere_width * 0.8),
+                          Base3DObjects.Point(self.sphere_width * 0.6, 70, self.sphere_width * 0.2),
+                          Base3DObjects.Point(self.sphere_width * 0.5, 70, self.sphere_width * 0.2),
+                          Base3DObjects.Point(self.sphere_width * 0.2, 20, self.sphere_width * 0.8)]
+        camera_mov = Motion.BeizerObject(control_points, 5.0, 10.0)
+        self.camera_motions.append(camera_mov)
+
+        # Motion 2
+        control_points = [Base3DObjects.Point(self.sphere_width * 0.2, 20, self.sphere_width * 0.8),
+                          Base3DObjects.Point(self.sphere_width * 0.5, 70, self.sphere_width * 0.2),
+                          Base3DObjects.Point(self.sphere_width * 0.6, 70, self.sphere_width * 0.2),
+                          Base3DObjects.Point(self.sphere_width * 0.8, 20, self.sphere_width * 0.8)]
+        camera_mov = Motion.BeizerObject(control_points, 15.0, 20.0)
+        self.camera_motions.append(camera_mov)
+
+        ########## Camera turns ##########
+        self.camera_turns = []
+        camera_turn_1 = Motion.CameraTurn(5.0, 10.0, 'left', 0.2)
+        self.camera_turns.append(camera_turn_1)
 
         # particles
         self.num_particles = 60
@@ -132,12 +148,8 @@ class GraphicsProgram3D:
                                                                                                   self.time_elapsed)
 
         # Camera
-        # new_pos = self.beizer_obj_camera.get_current_pos(self.time_elapsed)
-        # self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
-        #                                            self.sphere_width / 2 + new_pos.y,
-        #                                            - self.sphere_width / 2 + new_pos.z)
-        # self.shader.set_view_matrix(self.view_matrix.get_matrix())
-
+        self.update_camera_position()
+        self.update_camera_rotation()
 
         # look up/down/left/right
         if self.UP_key_right:
@@ -167,6 +179,19 @@ class GraphicsProgram3D:
         if self.UP_key_d:
             self.view_matrix.walk(walk_speed, 0, 0)
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
+
+    def update_camera_position(self):
+        for m in self.camera_motions:
+            if self.time_elapsed > m.start_time and self.time_elapsed < m.end_time:
+                new_pos = m.get_current_pos(self.time_elapsed)
+                self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
+                                                        self.sphere_width / 2 + new_pos.y,
+                                                        - self.sphere_width / 2 + new_pos.z)
+                self.shader.set_view_matrix(self.view_matrix.get_matrix())
+
+    def update_camera_rotation(self):
+        for t in self.camera_turns:
+            t.turn_camera(self.time_elapsed, self.shader, self.view_matrix)
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
