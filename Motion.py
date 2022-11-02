@@ -44,9 +44,15 @@ class BezierMotion:
         self.p4 = p4
         self.start_time = start_time
         self.end_time = end_time
+        self.static = False
+
+        if self.p1.is_same_as(self.p2) and self.p2.is_same_as(self.p3) and self.p3.is_same_as(self.p4):
+            self.static = True
 
     def get_current_pos(self, curr_time: float):
-        if (curr_time < self.start_time):
+        if self.static:
+            out_pos = self.p1
+        elif (curr_time < self.start_time):
             out_pos = self.p1
         elif (curr_time > self.end_time):
             out_pos = self.p4
@@ -81,13 +87,16 @@ class BezierMotion:
         return v_list
 
 class BeizerObject:
-    def __init__(self, control_points, start_time, end_time, start_scale = None, end_scale = None):
+    def __init__(self, control_points, start_time, end_time,
+                 start_scale = None, end_scale = None, rot_angle = None, rot_axis = None):
         self.beizer_motions = []
         self.times = []
         self.start_scale = start_scale
         self.end_scale = end_scale
         self.start_time = start_time
         self.end_time = end_time
+        self.rot_angle = rot_angle
+        self.rot_axis = rot_axis
 
         if len(control_points) == 4:
             self.beizer_motions.append(BezierMotion(control_points[0],
@@ -111,7 +120,8 @@ class BeizerObject:
 
             # calc b2
             v = control_points[3].__sub__(control_points[2])
-            b2 = control_points[3].__add__(v)
+            v_scaled = v.__mul__(1)
+            b2 = control_points[3].__add__(v_scaled)
             print("B2:", b2.to_string())
 
             self.beizer_motions.append(BezierMotion(control_points[3],
@@ -131,16 +141,34 @@ class BeizerObject:
                 return self.beizer_motions[1].get_current_pos(curr_time)
 
     def get_current_scale(self, curr_time):
-        if curr_time < self.start_time:
-            return self.start_scale
-        elif curr_time > self.end_time:
-            return self.end_scale
+        if self.start_scale is None:
+            return 1.0
         else:
-            tot_time = self.end_time - self.start_time
-            part_time = (curr_time - self.start_time) / tot_time
+            if curr_time < self.start_time:
+                return self.start_scale
+            elif curr_time > self.end_time:
+                return self.end_scale
+            else:
+                tot_time = self.end_time - self.start_time
+                part_time = (curr_time - self.start_time) / tot_time
 
-            curr_scale = (1 - part_time) * self.start_scale + part_time * self.end_scale
-            return curr_scale
+                curr_scale = (1 - part_time) * self.start_scale + part_time * self.end_scale
+                return curr_scale
+
+    def get_curr_rot_angle(self, curr_time):
+        if self.rot_angle is None:
+            return 0
+        else:
+            if curr_time < self.start_time:
+                return 0
+            elif curr_time > self.end_time:
+                return self.rot_angle
+            else:
+                tot_time = self.end_time - self.start_time
+                part_time = (curr_time - self.start_time) / tot_time
+
+                curr_rot_angle = part_time * self.rot_angle
+                return curr_rot_angle
 
 class CameraTurn:
     def __init__(self, start_time: float, end_time: float, dir: str, angle_speed: float):

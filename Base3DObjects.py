@@ -19,6 +19,12 @@ class Point:
     def to_string(self):
         return "(" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + ")"
 
+    def is_same_as(self, p2):
+        if self.x == p2.x and self.y == p2.y and self.z == p2.z:
+            return True
+        else:
+            return False
+
 class Vector:
     def __init__(self, x, y, z):
         self.x = x

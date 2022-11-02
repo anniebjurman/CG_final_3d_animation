@@ -55,14 +55,36 @@ class GraphicsProgram3D:
 
         # Motion
         # Rocket
-        control_points = [Base3DObjects.Point(-30, -10, -60),
+        self.beizer_obj_rocket = []
+        control_points = [Base3DObjects.Point(-20, -10, -60),
                           Base3DObjects.Point(-50, -10, -50),
                           Base3DObjects.Point(-50, -5, -40),
                           Base3DObjects.Point(0, 0, -30),
                           Base3DObjects.Point(50, 5, -10),
                           Base3DObjects.Point(10, 0, -15)]
+        rocket_mov = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
+        self.beizer_obj_rocket.append(rocket_mov)
 
-        self.beizer_obj_rocket = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
+        control_points = [Base3DObjects.Point(10, 0, -15),
+                          Base3DObjects.Point(10, 0, -15),
+                          Base3DObjects.Point(10, 0, -15),
+                          Base3DObjects.Point(10, 0, -15)]
+        rocket_mov = Motion.BeizerObject(control_points, 20.0, 25.0, 0.5, 0.5)
+        self.beizer_obj_rocket.append(rocket_mov)
+
+        control_points = [Base3DObjects.Point(10, 0, -15),
+                          Base3DObjects.Point(30, 0, 50),
+                          Base3DObjects.Point(-20, 0, 50),
+                          Base3DObjects.Point(-20, 0, 15)]
+        rocket_mov = Motion.BeizerObject(control_points, 25.0, 30.0, 0.5, 0.5, -180, 'y')
+        self.beizer_obj_rocket.append(rocket_mov)
+
+        control_points = [Base3DObjects.Point(-20, 0, 15),
+                          Base3DObjects.Point(-50, -5, -50),
+                          Base3DObjects.Point(-20, -10, -55),
+                          Base3DObjects.Point(-20, -10, -60)]
+        rocket_mov = Motion.BeizerObject(control_points, 30.0, 35.0, 0.5, 0.001)
+        self.beizer_obj_rocket.append(rocket_mov)
 
         ########## Camera motions ##########
         # Motion 1
@@ -79,13 +101,20 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(self.sphere_width * 0.5, 70, self.sphere_width * 0.2),
                           Base3DObjects.Point(self.sphere_width * 0.6, 70, self.sphere_width * 0.2),
                           Base3DObjects.Point(self.sphere_width * 0.8, 20, self.sphere_width * 0.8)]
-        camera_mov = Motion.BeizerObject(control_points, 15.0, 20.0)
+        camera_mov = Motion.BeizerObject(control_points, 12.0, 20.0)
         self.camera_motions.append(camera_mov)
 
         ########## Camera turns ##########
         self.camera_turns = []
-        camera_turn_1 = Motion.CameraTurn(5.0, 10.0, 'left', 0.2)
-        self.camera_turns.append(camera_turn_1)
+        # Turn 1
+        camera_turn = Motion.CameraTurn(5.0, 10.0, 'left', 0.2)
+        self.camera_turns.append(camera_turn)
+        # Turn 1.2
+        camera_turn = Motion.CameraTurn(5.0, 10.0, 'down', 0.09)
+        self.camera_turns.append(camera_turn)
+        # Turn 2
+        camera_turn = Motion.CameraTurn(12.0, 20.0, 'up', 0.05)
+        self.camera_turns.append(camera_turn)
 
         # particles
         self.num_particles = 60
@@ -148,8 +177,8 @@ class GraphicsProgram3D:
                                                                                                   self.time_elapsed)
 
         # Camera
-        self.update_camera_position()
-        self.update_camera_rotation()
+        # self.update_camera_position()
+        # self.update_camera_rotation()
 
         # look up/down/left/right
         if self.UP_key_right:
@@ -243,12 +272,6 @@ class GraphicsProgram3D:
             rand_y = rand.uniform(-40, 40)
             rand_z = rand.uniform(40, -40)
 
-            # while rand_y < 10 and rand_y > -10:
-            #     rand_y = rand.uniform(-80, 80)
-
-            # while rand_z < 10 and rand_z > -10:
-            #     rand_z = rand.uniform(-80, 80)
-
             pos1 = Base3DObjects.Point(-100, rand_y, rand_z)
             pos2 = Base3DObjects.Point(100, rand_y, rand_z)
             motion = Motion.LinearMotion(pos1, pos2, start_time, end_time)
@@ -260,15 +283,21 @@ class GraphicsProgram3D:
         return linjear_motions, start_time
 
     def draw_bez_moving_rocket(self):
-        curr_pos = self.beizer_obj_rocket.get_current_pos(self.time_elapsed)
-        curr_scale = self.beizer_obj_rocket.get_current_scale(self.time_elapsed)
-        self.shader.set_using_texture(0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
-        self.model_matrix.add_scale(curr_scale, curr_scale, curr_scale)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.obj_model_rocket.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        for m in self.beizer_obj_rocket:
+            if self.time_elapsed > m.start_time and self.time_elapsed < m.end_time:
+                curr_pos = m.get_current_pos(self.time_elapsed)
+                curr_scale = m.get_current_scale(self.time_elapsed)
+                self.shader.set_using_texture(0.0)
+                self.model_matrix.push_matrix()
+                self.model_matrix.add_translation(curr_pos.x, curr_pos.y, curr_pos.z)
+                self.model_matrix.add_scale(curr_scale, curr_scale, curr_scale)
+                if m.rot_angle:
+                    self.model_matrix.add_rotation(m.get_curr_rot_angle(self.time_elapsed), m.rot_axis)
+                if m.start_time == 30.0:
+                    self.model_matrix.add_rotation(-180, 'y')
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+                self.obj_model_rocket.draw(self.shader)
+                self.model_matrix.pop_matrix()
 
     def draw_lin_moving_particles(self):
         self.shader.set_using_texture(0.0)
