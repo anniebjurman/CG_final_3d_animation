@@ -41,7 +41,14 @@ class GraphicsProgram3D:
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # set light
-        self.shader.set_light_position(Base3DObjects.Point(self.sphere_width/4, self.sphere_width/2, self.sphere_width/2))
+        self.light_positions = {"sun": Base3DObjects.Point(self.sphere_width/2 - 20, self.sphere_width/2 - 5, self.sphere_width/2 - 30),
+                                "person_pos": Base3DObjects.Point(self.sphere_width/2 + 20, self.sphere_width/2 + 10, self.sphere_width/2),
+                                "person_neg": Base3DObjects.Point(self.sphere_width/2, self.sphere_width/2 + 10, self.sphere_width/2 + 20)}
+        self.shader.set_light_position(self.light_positions['sun'])
+
+        self.light_colors = {"sun": Base3DObjects.Color(0.96, 0.83, 0.37),
+                             "person_pos": Base3DObjects.Color(0.61, 0.81, 0.36),
+                             "person_neg": Base3DObjects.Color(0.81, 0.36 ,0.36)}
 
         # General objects
         self.cube = Base3DObjects.Cube()
@@ -60,7 +67,7 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(-50, -10, -50),
                           Base3DObjects.Point(-50, -5, -40),
                           Base3DObjects.Point(0, 0, -30),
-                          Base3DObjects.Point(50, 5, -10),
+                          Base3DObjects.Point(0, 5, -20),
                           Base3DObjects.Point(10, 0, -15)]
         rocket_mov = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
         self.beizer_obj_rocket.append(rocket_mov)
@@ -82,7 +89,7 @@ class GraphicsProgram3D:
         control_points = [Base3DObjects.Point(-20, 0, 15),
                           Base3DObjects.Point(-50, -5, -50),
                           Base3DObjects.Point(-20, -10, -55),
-                          Base3DObjects.Point(-20, -10, -60)]
+                          Base3DObjects.Point(-17, -6, -60)]
         rocket_mov = Motion.BeizerObject(control_points, 30.0, 35.0, 0.5, 0.001)
         self.beizer_obj_rocket.append(rocket_mov)
 
@@ -166,6 +173,7 @@ class GraphicsProgram3D:
 
     def update(self):
         self.time_elapsed = pygame.time.get_ticks() / 1000
+        # self.time_elapsed = 34.5
         self.delta_time = self.clock.tick() / 1000
         # self.angle += math.pi * self.delta_time
         self.angle = math.pi * self.time_elapsed / 10
@@ -179,6 +187,9 @@ class GraphicsProgram3D:
         # Camera
         # self.update_camera_position()
         # self.update_camera_rotation()
+
+        # Lights
+        self.update_light()
 
         # look up/down/left/right
         if self.UP_key_right:
@@ -209,6 +220,24 @@ class GraphicsProgram3D:
             self.view_matrix.walk(walk_speed, 0, 0)
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
+    def update_light(self):
+        if self.time_elapsed < 10:
+            self.shader.set_light_position(self.light_positions["sun"])
+            color = self.light_colors["sun"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+        elif self.time_elapsed < 20:
+            self.shader.set_light_position(self.light_positions["person_pos"])
+            color = self.light_colors["person_pos"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+        elif self.time_elapsed < 30:
+            self.shader.set_light_position(self.light_positions["person_neg"])
+            color = self.light_colors["person_neg"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+        else:
+            self.shader.set_light_position(self.light_positions["sun"])
+            color = self.light_colors["sun"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+
     def update_camera_position(self):
         for m in self.camera_motions:
             if self.time_elapsed > m.start_time and self.time_elapsed < m.end_time:
@@ -228,11 +257,15 @@ class GraphicsProgram3D:
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         # Lights
-        self.shader.set_light_diffuse(1, 1, 1)
+        # 1, 0.62, 0.13
+        # self.shader.set_light_diffuse(0.96, 0.83, 0.37)
         self.shader.set_light_ambient(0.2, 0.2, 0.2)
         self.shader.set_light_specular(1, 1, 1)
         self.shader.set_global_ambient(1, 1, 1)
         self.shader.set_eye_location(self.view_matrix.eye)
+        self.shader.set_mat_diffuse(Base3DObjects.Color(1.0, 1.0, 1.0))
+        self.shader.set_mat_shine(13)
+        self.shader.set_mat_ambient(Base3DObjects.Color(0.1, 0.1, 0.1))
 
         ######### Translated to middle of sphere #########
         self.model_matrix.push_matrix()
@@ -562,6 +595,7 @@ class GraphicsProgram3D:
         self.shader.set_using_texture(1.0)
         Texture.set_diffuse_tex(self.shader, self.texture_sun)
         Texture.set_specular_tex(self.shader, self.texture_sun)
+
         self.model_matrix.push_matrix()
         self.model_matrix.add_scale(4, 4, 4)
         self.shader.set_model_matrix(self.model_matrix.matrix)
