@@ -120,7 +120,7 @@ class BeizerObject:
 
             # calc b2
             v = control_points[3].__sub__(control_points[2])
-            v_scaled = v.__mul__(0.7)
+            v_scaled = v.__mul__(0.5)
             b2 = control_points[3].__add__(v_scaled)
 
             self.beizer_motions.append(BezierMotion(control_points[3],
