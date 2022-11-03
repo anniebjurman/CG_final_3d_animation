@@ -1,6 +1,4 @@
-from lib2to3.pytree import Base
 import math
-from multiprocessing import current_process
 import sys
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -38,7 +36,6 @@ class GraphicsProgram3D:
 
         # set camera
         self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 - 2, self.sphere_width/2 + 3, self.sphere_width/2 + 13)
-        # self.view_matrix.turn(180)
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # set light
@@ -76,21 +73,21 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(-50, -10, -50),
                           Base3DObjects.Point(-50, -5, -40),
                           Base3DObjects.Point(0, 0, -30),
-                          Base3DObjects.Point(0, 5, -20),
-                          Base3DObjects.Point(10, 0, -15)]
+                          Base3DObjects.Point(0, 0, -10),
+                          Base3DObjects.Point(10, 0, -17)]
         rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][0], self.kf_starts["rocket_s"][1], 0.001, 0.5)
         self.beizer_obj_rocket.append(rocket_mov)
 
         # stand still by platform
-        control_points = [Base3DObjects.Point(10, 0, -15),
-                          Base3DObjects.Point(10, 0, -15),
-                          Base3DObjects.Point(10, 0, -15),
-                          Base3DObjects.Point(10, 0, -15)]
+        control_points = [Base3DObjects.Point(10, 0, -17),
+                          Base3DObjects.Point(10, 0, -17),
+                          Base3DObjects.Point(10, 0, -17),
+                          Base3DObjects.Point(10, 0, -17)]
         rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][1], self.kf_starts["rocket_s"][2], 0.5, 0.5)
         self.beizer_obj_rocket.append(rocket_mov)
 
         # turn around platform
-        control_points = [Base3DObjects.Point(10, 0, -15),
+        control_points = [Base3DObjects.Point(10, 0, -17),
                           Base3DObjects.Point(30, 0, 50),
                           Base3DObjects.Point(-20, 0, 50),
                           Base3DObjects.Point(-20, 0, 15)]
@@ -151,10 +148,7 @@ class GraphicsProgram3D:
         camera_walk = Motion.CameraWalk(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'up', 0.015)
         self.camera_walks.append(camera_walk)
 
-        # camera_walk = Motion.CameraWalk(self.kf_starts["rocket_s"][2], self.kf_starts["rocket_s"][3], 'backward', 0.1)
-        # self.camera_walks.append(camera_walk)
-
-        camera_walk = Motion.CameraWalk(self.kf_starts["rocket_s"][3], self.kf_starts["rocket_s"][4], 'forward', 0.45)
+        camera_walk = Motion.CameraWalk(self.kf_starts["rocket_s"][3], self.kf_starts["rocket_s"][4], 'forward', 0.43)
         self.camera_walks.append(camera_walk)
 
         # particles
@@ -177,17 +171,6 @@ class GraphicsProgram3D:
         self.delta_time = None
         self.angle_deg = None
 
-        # Camera controll
-        self.UP_key_right = False
-        self.UP_key_left = False
-        self.UP_key_up = False
-        self.UP_key_down = False
-
-        self.UP_key_w = False
-        self.UP_key_s = False
-        self.UP_key_a = False
-        self.UP_key_d = False
-
         # textures
         self.texture_id_01 = Texture.load_texture(sys.path[0] + "/textures/tex_01.png")
         self.texture_floor = Texture.load_texture(sys.path[0] + "/textures/tex_metallic_floor_2.jpeg")
@@ -203,13 +186,10 @@ class GraphicsProgram3D:
         self.texture_saturn = Texture.load_texture(sys.path[0] + "/textures/tex_saturn.jpeg")
         self.texture_neptune = Texture.load_texture(sys.path[0] + "/textures/tex_neptune.jpeg")
         self.texture_uranus = Texture.load_texture(sys.path[0] + "/textures/tex_uranus.jpeg")
-        self.texture_moon = Texture.load_texture(sys.path[0] + "/textures/tex_moon.jpeg")
 
     def update(self):
         self.time_elapsed = pygame.time.get_ticks() / 1000
-        # self.time_elapsed = 34.5
         self.delta_time = self.clock.tick() / 1000
-        # self.angle += math.pi * self.delta_time
         self.angle = math.pi * self.time_elapsed / 10
         self.angle_deg = self.angle * 57.2957795
 
@@ -223,35 +203,6 @@ class GraphicsProgram3D:
 
         # Lights
         self.update_light()
-
-        # look up/down/left/right
-        if self.UP_key_right:
-            self.view_matrix.turn(-self.angle_turn)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_left:
-            self.view_matrix.turn(self.angle_turn)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_up:
-            self.view_matrix.pitch(-self.angle_turn)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_down:
-            self.view_matrix.pitch(self.angle_turn)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-
-        # Walk forward/backwards/left/right
-        walk_speed = self.delta_time * 12
-        if self.UP_key_w:
-            self.view_matrix.walk(0, 0, -walk_speed)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_s:
-            self.view_matrix.walk(0, 0, walk_speed)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_a:
-            self.view_matrix.walk(-walk_speed, 0, 0)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        if self.UP_key_d:
-            self.view_matrix.walk(walk_speed, 0, 0)
-            self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
     def update_light(self):
         if self.time_elapsed < self.kf_starts["1_start"]:
@@ -289,8 +240,6 @@ class GraphicsProgram3D:
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         # Lights
-        # 1, 0.62, 0.13
-        # self.shader.set_light_diffuse(0.96, 0.83, 0.37)
         self.shader.set_light_ambient(0.2, 0.2, 0.2)
         self.shader.set_light_specular(1, 1, 1)
         self.shader.set_global_ambient(1, 1, 1)
@@ -315,7 +264,6 @@ class GraphicsProgram3D:
             self.draw_model_positive_text()
 
         self.draw_lin_moving_particles()
-        # self.draw_model_rocket()
         self.draw_bez_moving_rocket()
 
         self.model_matrix.pop_matrix()
@@ -460,17 +408,6 @@ class GraphicsProgram3D:
 
         self.obj_model_positive_text.draw(self.shader)
         self.model_matrix.pop_matrix()
-
-    def draw_model_rocket(self):
-        self.shader.set_using_texture(0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(x = 20)
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-
-        self.obj_model_rocket.draw(self.shader)
-        self.model_matrix.pop_matrix()
-
 
     # Planets
     def draw_solar_system(self):
@@ -640,65 +577,15 @@ class GraphicsProgram3D:
         self.opt_sphere.draw()
         self.model_matrix.pop_matrix()
 
-    def draw_moon(self):
-        self.shader.set_using_texture(1.0)
-        Texture.set_diffuse_tex(self.shader, self.texture_moon)
-        Texture.set_specular_tex(self.shader, self.texture_moon)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_scale(0.3, 0.3, 0.3)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-
-        self.opt_sphere.set_vertices(self.shader)
-        self.opt_sphere.draw()
-        self.model_matrix.pop_matrix()
-
     def program_loop(self):
         exiting = False
         while not exiting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    print("Quitting!")
                     exiting = True
-
-                elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:
                     if event.key == K_ESCAPE:
                         exiting = True
-                    elif event.key == K_RIGHT:
-                        self.UP_key_right = True
-                    elif event.key == K_LEFT:
-                        self.UP_key_left = True
-                    elif event.key == K_UP:
-                        self.UP_key_up = True
-                    elif event.key == K_DOWN:
-                        self.UP_key_down = True
-
-                    elif event.key == K_w:
-                        self.UP_key_w = True
-                    elif event.key == K_s:
-                        self.UP_key_s = True
-                    elif event.key == K_a:
-                        self.UP_key_a = True
-                    elif event.key == K_d:
-                        self.UP_key_d = True
-
-                elif event.type == pygame.KEYUP:
-                    if event.key == K_RIGHT:
-                        self.UP_key_right = False
-                    elif event.key == K_LEFT:
-                        self.UP_key_left = False
-                    elif event.key == K_UP:
-                        self.UP_key_up = False
-                    elif event.key == K_DOWN:
-                        self.UP_key_down = False
-
-                    elif event.key == K_w:
-                        self.UP_key_w = False
-                    elif event.key == K_s:
-                        self.UP_key_s = False
-                    elif event.key == K_a:
-                        self.UP_key_a = False
-                    elif event.key == K_d:
-                        self.UP_key_d = False
 
             self.update()
             self.display()

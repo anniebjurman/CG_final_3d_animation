@@ -2,7 +2,6 @@ from lib2to3.pgen2 import token
 from Base3DObjects import *
 
 def load_mtl_file(file_location, file_name, mesh_model):
-    # print("  Start loading MTL: " + file_name)
     mtl = None
     fin = open(file_location + "/" + file_name)
     for line in fin.readlines():
@@ -10,7 +9,6 @@ def load_mtl_file(file_location, file_name, mesh_model):
         if len(tokens) == 0:
             continue
         if tokens[0] == "newmtl":
-            # print("    Material: " + tokens[1])
             mtl = Material()
             mesh_model.add_material(tokens[1], mtl)
         elif tokens[0] == "Kd":
@@ -23,10 +21,8 @@ def load_mtl_file(file_location, file_name, mesh_model):
             mtl.ambient = Color(float(tokens[1]), float(tokens[2]), float(tokens[3]))
         elif tokens[0] == "map_Kd":
             mtl.tex_map = str(tokens[1])
-    # print("  Finished loading MTL: " + file_name)
 
 def load_obj_file(file_location, file_name):
-    # print("Start loading OBJ: " + file_name)
     mesh_model = MeshModel()
     current_object_id = None
     current_position_list = []
@@ -39,10 +35,7 @@ def load_obj_file(file_location, file_name):
         if tokens[0] == "mtllib":
             load_mtl_file(file_location, tokens[1], mesh_model)
         elif tokens[0] == "o":
-            # print("  Mesh: " + tokens[1])
             current_object_id = tokens[1]
-            # current_position_list = []
-            # current_normal_list = []
         elif tokens[0] == "v":
             current_position_list.append(Point(float(tokens[1]), float(tokens[2]), float(tokens[3])))
         elif tokens[0] == "vn":
@@ -58,16 +51,8 @@ def load_obj_file(file_location, file_name):
                     current_position_list = []
                 if current_normal_list == None:
                     current_normal_list = []
-                # print(str(1) + " " + str(i+2) + " " + str(i+3))
-                # print(int(tokens[i+3][0]))
-                # print(int(tokens[i+3][2]))
-                # print("size: " + str(len(current_position_list)))
-                # print("size: " + str(len(current_normal_list)))
-                # print(int(tokens[1][0])-1)
-                # print(int(tokens[1][2])-1)
                 mesh_model.add_vertex(current_object_id, current_position_list[int(tokens[1][0])-1], current_normal_list[int(tokens[1][2])-1])
                 mesh_model.add_vertex(current_object_id, current_position_list[int(tokens[i+2][0])-1], current_normal_list[int(tokens[i+2][2])-1])
                 mesh_model.add_vertex(current_object_id, current_position_list[int(tokens[i+3][0])-1], current_normal_list[int(tokens[i+3][2])-1])
     mesh_model.set_opengl_buffers()
-    # print("Finished loading OBJ: " + file_name)
     return mesh_model
