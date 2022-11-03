@@ -172,10 +172,8 @@ class GraphicsProgram3D:
         self.angle_deg = None
 
         # textures
-        self.texture_id_01 = Texture.load_texture(sys.path[0] + "/textures/tex_01.png")
         self.texture_floor = Texture.load_texture(sys.path[0] + "/textures/tex_metallic_floor_2.jpeg")
         self.texture_sphere = Texture.load_texture(sys.path[0] + "/textures/tex_sphere_6.png")
-        self.texture_box = Texture.load_texture(sys.path[0] + "/textures/tex_metallic.jpeg")
         # Planets
         self.texture_sun = Texture.load_texture(sys.path[0] + "/textures/tex_sun.jpeg")
         self.texture_mercury = Texture.load_texture(sys.path[0] + "/textures/tex_mercury.jpeg")
