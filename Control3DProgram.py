@@ -31,13 +31,14 @@ class GraphicsProgram3D:
         self.sphere_width = 100
 
         self.projection_matrix = Matrices.ProjectionMatrix()
-        self.projection_matrix.set_perspective(60, 1920/1080, 1, 300)
+        self.projection_matrix.set_perspective(60, 1920/1080, 5, 300)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.view_matrix = Matrices.ViewMatrix()
 
         # set camera
-        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2, self.sphere_width/2 + 3, self.sphere_width/2 + 15)             #make 5 a variable dependent on the floor dim
+        self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 - 2, self.sphere_width/2 + 3, self.sphere_width/2 + 13)
+        # self.view_matrix.turn(180)
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         # set light
@@ -50,6 +51,14 @@ class GraphicsProgram3D:
                              "person_pos": Base3DObjects.Color(0.61, 0.81, 0.36),
                              "person_neg": Base3DObjects.Color(0.81, 0.36 ,0.36)}
 
+        self.kf_starts = {"1_start": 4.0,
+                          "2_p_neg": 10.0,
+                          "3_c_move": 15.0,
+                          "4_p_pos": 20.0,
+                          "5_c_move": 25.0,
+                          "rocket_s": [25.0, 40.0, 42.0, 47.0, 52.0],
+                          "remove_p": 75.0}
+
         # General objects
         self.cube = Base3DObjects.Cube()
         self.opt_sphere = Base3DObjects.OptimizedSphere(24, 48)
@@ -61,7 +70,7 @@ class GraphicsProgram3D:
         self.time_elapsed = 0
 
         # Motion
-        # Rocket
+        # to platform
         self.beizer_obj_rocket = []
         control_points = [Base3DObjects.Point(-20, -10, -60),
                           Base3DObjects.Point(-50, -10, -50),
@@ -69,59 +78,69 @@ class GraphicsProgram3D:
                           Base3DObjects.Point(0, 0, -30),
                           Base3DObjects.Point(0, 5, -20),
                           Base3DObjects.Point(10, 0, -15)]
-        rocket_mov = Motion.BeizerObject(control_points, 5.0, 20.0, 0.001, 0.5)
+        rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][0], self.kf_starts["rocket_s"][1], 0.001, 0.5)
         self.beizer_obj_rocket.append(rocket_mov)
 
+        # stand still by platform
         control_points = [Base3DObjects.Point(10, 0, -15),
                           Base3DObjects.Point(10, 0, -15),
                           Base3DObjects.Point(10, 0, -15),
                           Base3DObjects.Point(10, 0, -15)]
-        rocket_mov = Motion.BeizerObject(control_points, 20.0, 25.0, 0.5, 0.5)
+        rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][1], self.kf_starts["rocket_s"][2], 0.5, 0.5)
         self.beizer_obj_rocket.append(rocket_mov)
 
+        # turn around platform
         control_points = [Base3DObjects.Point(10, 0, -15),
                           Base3DObjects.Point(30, 0, 50),
                           Base3DObjects.Point(-20, 0, 50),
                           Base3DObjects.Point(-20, 0, 15)]
-        rocket_mov = Motion.BeizerObject(control_points, 25.0, 30.0, 0.5, 0.5, -180, 'y')
+        rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][2], self.kf_starts["rocket_s"][3], 0.5, 0.5, -180, 'y')
         self.beizer_obj_rocket.append(rocket_mov)
 
+        # back to earth
         control_points = [Base3DObjects.Point(-20, 0, 15),
                           Base3DObjects.Point(-50, -5, -50),
                           Base3DObjects.Point(-20, -10, -55),
                           Base3DObjects.Point(-17, -6, -60)]
-        rocket_mov = Motion.BeizerObject(control_points, 30.0, 35.0, 0.5, 0.001)
+        rocket_mov = Motion.BeizerObject(control_points, self.kf_starts["rocket_s"][3], self.kf_starts["rocket_s"][4], 0.5, 0.001)
         self.beizer_obj_rocket.append(rocket_mov)
-
-        ########## Camera motions ##########
-        # Motion 1
-        self.camera_motions = []
-        control_points = [Base3DObjects.Point(self.sphere_width * 0.8, 20, self.sphere_width * 0.8),
-                          Base3DObjects.Point(self.sphere_width * 0.6, 70, self.sphere_width * 0.2),
-                          Base3DObjects.Point(self.sphere_width * 0.5, 70, self.sphere_width * 0.2),
-                          Base3DObjects.Point(self.sphere_width * 0.2, 20, self.sphere_width * 0.8)]
-        camera_mov = Motion.BeizerObject(control_points, 5.0, 10.0)
-        self.camera_motions.append(camera_mov)
-
-        # Motion 2
-        control_points = [Base3DObjects.Point(self.sphere_width * 0.2, 20, self.sphere_width * 0.8),
-                          Base3DObjects.Point(self.sphere_width * 0.5, 70, self.sphere_width * 0.2),
-                          Base3DObjects.Point(self.sphere_width * 0.6, 70, self.sphere_width * 0.2),
-                          Base3DObjects.Point(self.sphere_width * 0.8, 20, self.sphere_width * 0.8)]
-        camera_mov = Motion.BeizerObject(control_points, 12.0, 20.0)
-        self.camera_motions.append(camera_mov)
 
         ########## Camera turns ##########
         self.camera_turns = []
-        # Turn 1
-        camera_turn = Motion.CameraTurn(5.0, 10.0, 'left', 0.2)
+        camera_turn = Motion.CameraTurn(self.kf_starts["1_start"] - 1, self.kf_starts["2_p_neg"], 'left', 0.01)
         self.camera_turns.append(camera_turn)
-        # Turn 1.2
-        camera_turn = Motion.CameraTurn(5.0, 10.0, 'down', 0.09)
+
+        camera_turn = Motion.CameraTurn(self.kf_starts["2_p_neg"], self.kf_starts["3_c_move"], 'left', 0.15)
         self.camera_turns.append(camera_turn)
-        # Turn 2
-        camera_turn = Motion.CameraTurn(12.0, 20.0, 'up', 0.05)
+
+        camera_turn = Motion.CameraTurn(self.kf_starts["3_c_move"], self.kf_starts["4_p_pos"], 'right', 0.01)
         self.camera_turns.append(camera_turn)
+
+        camera_turn = Motion.CameraTurn(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'right', 0.2)
+        self.camera_turns.append(camera_turn)
+        camera_turn = Motion.CameraTurn(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'down', 0.05)
+        self.camera_turns.append(camera_turn)
+
+        camera_turn = Motion.CameraTurn(self.kf_starts["5_c_move"], self.kf_starts["rocket_s"][1], 'left', 0.01)
+        self.camera_turns.append(camera_turn)
+
+        ########## Camera walks ##########
+        self.camera_walks = []
+        camera_walk = Motion.CameraWalk(self.kf_starts["1_start"] - 1, self.kf_starts["2_p_neg"], 'right', 0.005)
+        self.camera_walks.append(camera_walk)
+
+        camera_walk = Motion.CameraWalk(self.kf_starts["2_p_neg"], self.kf_starts["3_c_move"], 'right', 0.04)
+        self.camera_walks.append(camera_walk)
+
+        camera_walk = Motion.CameraWalk(self.kf_starts["3_c_move"], self.kf_starts["4_p_pos"], 'backward', 0.002)
+        self.camera_walks.append(camera_walk)
+
+        camera_walk = Motion.CameraWalk(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'left', 0.06)
+        self.camera_walks.append(camera_walk)
+        camera_walk = Motion.CameraWalk(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'backward', 0.02)
+        self.camera_walks.append(camera_walk)
+        camera_walk = Motion.CameraWalk(self.kf_starts["4_p_pos"], self.kf_starts["5_c_move"], 'up', 0.01)
+        self.camera_walks.append(camera_walk)
 
         # particles
         self.num_particles = 60
@@ -183,10 +202,9 @@ class GraphicsProgram3D:
             self.linjear_motions_2 = self.linjear_motions_1
             self.linjear_motions_1, self.last_start_particle_time = self.generate_linjear_motions(self.num_particles,
                                                                                                   self.time_elapsed)
-
         # Camera
-        # self.update_camera_position()
-        # self.update_camera_rotation()
+        self.update_camera_turns()
+        self.update_camera_walks()
 
         # Lights
         self.update_light()
@@ -221,35 +239,35 @@ class GraphicsProgram3D:
             self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
     def update_light(self):
-        if self.time_elapsed < 10:
+        print(self.time_elapsed)
+        if self.time_elapsed < self.kf_starts["1_start"]:
             self.shader.set_light_position(self.light_positions["sun"])
             color = self.light_colors["sun"]
             self.shader.set_light_diffuse(color.r, color.g, color.b)
-        elif self.time_elapsed < 20:
-            self.shader.set_light_position(self.light_positions["person_pos"])
-            color = self.light_colors["person_pos"]
-            self.shader.set_light_diffuse(color.r, color.g, color.b)
-        elif self.time_elapsed < 30:
+        elif self.time_elapsed < self.kf_starts["2_p_neg"]:
             self.shader.set_light_position(self.light_positions["person_neg"])
             color = self.light_colors["person_neg"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+        elif self.time_elapsed < self.kf_starts["3_c_move"]:
+            self.shader.set_light_position(self.light_positions["sun"])
+            color = self.light_colors["sun"]
+            self.shader.set_light_diffuse(color.r, color.g, color.b)
+        elif self.time_elapsed < self.kf_starts["4_p_pos"]:
+            self.shader.set_light_position(self.light_positions["person_pos"])
+            color = self.light_colors["person_pos"]
             self.shader.set_light_diffuse(color.r, color.g, color.b)
         else:
             self.shader.set_light_position(self.light_positions["sun"])
             color = self.light_colors["sun"]
             self.shader.set_light_diffuse(color.r, color.g, color.b)
 
-    def update_camera_position(self):
-        for m in self.camera_motions:
-            if self.time_elapsed > m.start_time and self.time_elapsed < m.end_time:
-                new_pos = m.get_current_pos(self.time_elapsed)
-                self.view_matrix.eye = Base3DObjects.Point(self.sphere_width/2 + new_pos.x,
-                                                        self.sphere_width / 2 + new_pos.y,
-                                                        - self.sphere_width / 2 + new_pos.z)
-                self.shader.set_view_matrix(self.view_matrix.get_matrix())
-
-    def update_camera_rotation(self):
+    def update_camera_turns(self):
         for t in self.camera_turns:
             t.turn_camera(self.time_elapsed, self.shader, self.view_matrix)
+
+    def update_camera_walks(self):
+        for t in self.camera_walks:
+            t.walk_camera(self.time_elapsed, self.shader, self.view_matrix)
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
@@ -274,10 +292,14 @@ class GraphicsProgram3D:
         self.draw_floor()
         self.draw_solar_system()
 
-        self.draw_model_person_idea()
-        self.draw_model_person_sitting()
-        self.draw_model_negative_text()
-        self.draw_model_positive_text()
+        if self.time_elapsed < self.kf_starts["remove_p"]:
+            self.draw_model_person_idea()
+            self.draw_model_person_sitting()
+        if self.kf_starts["1_start"] < self.time_elapsed < self.kf_starts["2_p_neg"]:
+            self.draw_model_negative_text()
+        if self.kf_starts["3_c_move"] < self.time_elapsed < self.kf_starts["4_p_pos"]:
+            self.draw_model_positive_text()
+
         self.draw_lin_moving_particles()
         # self.draw_model_rocket()
         self.draw_bez_moving_rocket()
@@ -326,7 +348,7 @@ class GraphicsProgram3D:
                 self.model_matrix.add_scale(curr_scale, curr_scale, curr_scale)
                 if m.rot_angle:
                     self.model_matrix.add_rotation(m.get_curr_rot_angle(self.time_elapsed), m.rot_axis)
-                if m.start_time == 30.0:
+                if m.start_time == self.kf_starts["rocket_s"][3]:
                     self.model_matrix.add_rotation(-180, 'y')
                 self.shader.set_model_matrix(self.model_matrix.matrix)
                 self.obj_model_rocket.draw(self.shader)

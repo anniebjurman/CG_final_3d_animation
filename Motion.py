@@ -120,9 +120,8 @@ class BeizerObject:
 
             # calc b2
             v = control_points[3].__sub__(control_points[2])
-            v_scaled = v #v.__mul__(0.5)
+            v_scaled = v.__mul__(0.7)
             b2 = control_points[3].__add__(v_scaled)
-            print("B2:", b2.to_string())
 
             self.beizer_motions.append(BezierMotion(control_points[3],
                                                     b2,
@@ -190,4 +189,32 @@ class CameraTurn:
                 shader.set_view_matrix(view_matrix.get_matrix())
             if self.dir == "down":
                 view_matrix.pitch(self.angle_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+
+class CameraWalk:
+    def __init__(self, start_time: float, end_time: float, dir: str, speed: float):
+        self.start_time = start_time
+        self.end_time = end_time
+        self.dir = dir
+        self.walk_speed = speed
+
+    def walk_camera(self, curr_time: float, shader, view_matrix):
+        if curr_time > self.start_time and curr_time < self.end_time:
+            if self.dir == "forward":
+                view_matrix.walk(0, 0, -self.walk_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "backward":
+                view_matrix.walk(0, 0, self.walk_speed)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "left":
+                view_matrix.walk(-self.walk_speed, 0, 0)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "right":
+                view_matrix.walk(self.walk_speed, 0, 0)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "up":
+                view_matrix.slide(0, self.walk_speed, 0)
+                shader.set_view_matrix(view_matrix.get_matrix())
+            if self.dir == "down":
+                view_matrix.slide(0, -self.walk_speed, 0)
                 shader.set_view_matrix(view_matrix.get_matrix())
